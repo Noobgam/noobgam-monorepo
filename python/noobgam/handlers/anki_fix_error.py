@@ -18,7 +18,8 @@ def handler(event, context):
                         },
                     },
                     ensure_ascii=False,
-                )
+                ),
+                theme=event["theme"],
             )
         )
     )

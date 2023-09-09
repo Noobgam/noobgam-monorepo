@@ -61,59 +61,54 @@ Conform strictly to the JSON format and do not add additional comments.
 """
 
 ANKI_CARD_GENERATE_EXAMPLE_SENTENCE = """
-You will be given a card that contains information, your task will be to compose an example sentence that can be used with this word/phrase.
+You will be given a card field containing information information, your task is to compose an example sentence that can be used with this word/phrase.
 
 Example input 1:
+Target language: Уnglish
 ```
 {{
-  "target_languages": "English",
-  "card": {{
-    "russian": "Окно",
-    "english": "Window"
-  }}
+  "Meaning": "Окно",
+  "Expression": "Window"
 }}
 ```
 
 Example output 1:
 ```
 {{
-  "russian": "Окно",
-  "english": "Window",
-  "english_example_sentence": "Close the window, it is cold outside!"
+  "Example sentence": "Close the window, it is cold outside!"
+  "Example sentence meaning": "Закрой окно, снаружи холодно!",
 }}
 ```
 
-Example input 1:
+Example input 2:
+Target language: japanese
 ```
 {{
-  "target_language": "Japanese"
-  "card": {{
-      "english": "the Shinkansen, the bullet train"
-      "japanese": "新幹線",
-      "japanese_reading": "新幹線[しんかんせん]",
-  }}
+  "Meaning": "the Shinkansen, the bullet train"
+  "Expression": "新幹線",
+  "Reading": "新幹線[しんかんせん]"
 }}
 
 Example output 2:
 ```
 {{
-  "english": "the Shinkansen, the bullet train",
-  "japanese": "新幹線",
-  "japanese_reading": "新幹線[しんかんせん]",
-  "japanese_example_sentence": "日本で有名な新幹線は、東京から大阪まで早く移動できます。",
-  "english_example_sentence": "Japan's famous Shinkansen is a fast way to travel from Tokyo to Osaka.",
-  "japanese_example_sentence_reading": "日[に]本[ほん]で有[ゆ]名[め]な新[しん]幹[かん]線[せん]は、東[と]京[きょう]から大[おお]阪[さか]まで早[はや]く移[い]動[どう]できます。"
+  "Example sentence": "日本で有名な新幹線は、東京から大阪まで早く移動できます。",
+  "Example sentence meaning": "Japan's famous Shinkansen is a fast way to travel from Tokyo to Osaka.",
+  "Example sentence reading": "日[に]本[ほん]で有[ゆ]名[め]な新[しん]幹[かん]線[せん]は、東[と]京[きょう]から大[おお]阪[さか]まで早[はや]く移[い]動[どう]できます。"
 }}
 ```
 
-Your current card is:
+Your current task:
+Target language: {target_language}
 ```
 {payload}
 ```
 
 Try to come up with an easy sentence that shows a good example of how the content of this card could be used.
+Today's sentence theme: {theme}
+Try to think of a sentence corresponding to that theme 
+
 For Japanese remember to add furigana to kanji for reading, do not add furigana if it is not needed
-Prepend a space before the kanji if it has furigana attached to it.
-Example of good furigana: "その 公[こう] 園[えん]に 向[む]かって 歩[ある]きます。"
+If there is a separate attribute for reading, only include furigana there, do not include furigana in example sentence 
 Conform strictly to the JSON format and do not add additional comments.
 """

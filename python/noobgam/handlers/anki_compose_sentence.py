@@ -1,29 +1,24 @@
 import json
+from dataclasses import dataclass
 
 from noobgam.llm.config import get_anki_chain
 from noobgam.llm.prompts import ANKI_CARD_GENERATE_EXAMPLE_SENTENCE, ANKI_CORRECT_ERRORS
 
 
-def handler(event, context):
+@dataclass
+class GenerateCardInput:
+    card_fields: dict[str, str]
+    target_language: str
+    theme: str
+
+
+def handler(inp: GenerateCardInput):
     anki_chain = get_anki_chain()
-    print(
-        anki_chain.predict(
-            input=ANKI_CARD_GENERATE_EXAMPLE_SENTENCE.format(
-                payload=json.dumps(
-                    {
-                        "target_languages": "Japanese",
-                        "card": {
-                            "Expression": "向かって",
-                            "Meaning": "towards",
-                            "Reading": "向[む]かって",
-                            "Lesson Number": "",
-                            "Example sentence": "",
-                            "Example sentence meaning": "",
-                            "Example sentence reading": "",
-                        },
-                    },
-                    ensure_ascii=False,
-                )
-            )
-        )
+    prompt_text = ANKI_CARD_GENERATE_EXAMPLE_SENTENCE.format(
+        payload=json.dumps(inp.card_fields, ensure_ascii=False),
+        target_language=inp.target_language,
+        theme=inp.theme,
+    )
+    return anki_chain.predict(
+        input=prompt_text
     )
