@@ -15,7 +15,6 @@ def _get_openai_llm() -> ChatOpenAI:
     return ChatOpenAI(
         temperature=0.1,
         openai_api_key=api_key,
-        # gpt-4 is only for prod
         model_name="gpt-4",
     )
 
@@ -25,6 +24,6 @@ def get_anki_chain():
     return ConversationChain(
         llm=_get_openai_llm(),
         prompt=ANKI_CARD_CONVERSATION_TEMPLATE,
-        verbose=False,
+        verbose=True,
         memory=memory,
     )

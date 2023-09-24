@@ -19,6 +19,4 @@ def handler(inp: GenerateCardInput):
         target_language=inp.target_language,
         theme=inp.theme,
     )
-    return anki_chain.predict(
-        input=prompt_text
-    )
+    return anki_chain.predict(input=prompt_text)
