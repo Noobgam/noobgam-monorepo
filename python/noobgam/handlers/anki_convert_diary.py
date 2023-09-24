@@ -12,7 +12,9 @@ class GenerateCardsFromDiary:
 
 def handler(inp: GenerateCardsFromDiary):
     anki_chain = get_anki_chain()
-    text_resp = anki_chain.predict(input=CONVERT_DIARY_TO_CARDS.format(diary=inp.diary))
+    text_resp = anki_chain.predict(
+        input=CONVERT_DIARY_TO_CARDS.format(diary=inp.diary)
+    )
     l = text_resp.find('```')
     r = text_resp.find('```', l + 1)
     return {

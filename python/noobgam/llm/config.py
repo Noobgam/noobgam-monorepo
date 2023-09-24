@@ -24,6 +24,6 @@ def get_anki_chain():
     return ConversationChain(
         llm=_get_openai_llm(),
         prompt=ANKI_CARD_CONVERSATION_TEMPLATE,
-        verbose=True,
+        verbose=False,
         memory=memory,
     )
