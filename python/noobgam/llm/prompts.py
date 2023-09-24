@@ -6,7 +6,7 @@ User will ask you to modify and create cards, they follow this JSON format:
 {{
   "Expression": //the expression in the original language
   "Meaning":    //the expression counterpart in english language
-  "Example":    //example sentence in the original language
+  "Example sentence":    //example sentence in the original language
   "Example sentence meaning": //approximate english translation of the example sentence
   "Example sentence reading": //reading of the example sentence (for Japanese only)
 }}
@@ -15,7 +15,7 @@ Example 1:
 {{
   "Expression": "Leere",
   "Meaning": "empty",
-  "Example": "Ich fühlte eine große Leere in mir."
+  "Example sentence": "Ich fühlte eine große Leere in mir."
 }}
 """
 
