@@ -1,7 +1,7 @@
 from flask import Flask
 
 from noobgam.handlers.anki_compose_sentence import GenerateCardInput
-from noobgam.handlers.anki_fix_error import GenerateCardsFromDiary
+from noobgam.handlers.anki_convert_diary import GenerateCardsFromDiary
 
 app = Flask(__name__)
 
@@ -19,6 +19,6 @@ def generateExampleSentence():
 def generateCardsFromDiary():
     from flask import request
 
-    from noobgam.handlers.anki_fix_error import handler
+    from noobgam.handlers.anki_convert_diary import handler
 
     return handler(GenerateCardsFromDiary(**request.json))
