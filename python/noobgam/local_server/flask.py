@@ -6,6 +6,7 @@ from noobgam.handlers.authorization_check import check_token
 
 app = Flask(__name__)
 
+
 def check_authorization(request: Request):
     if not request.authorization or not request.authorization.token:
         abort(401)
@@ -31,3 +32,7 @@ def generateCardsFromDiary():
     check_authorization(request)
 
     return handler(GenerateCardsFromDiary(**request.json))
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
