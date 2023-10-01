@@ -19,6 +19,7 @@ def generateExampleSentence():
     from flask import request
 
     from noobgam.handlers.anki_compose_sentence import handler
+
     check_authorization(request)
 
     return handler(GenerateCardInput(**request.json))
@@ -29,10 +30,11 @@ def generateCardsFromDiary():
     from flask import request
 
     from noobgam.handlers.anki_convert_diary import handler
+
     check_authorization(request)
 
     return handler(GenerateCardsFromDiary(**request.json))
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)

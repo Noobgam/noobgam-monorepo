@@ -1,5 +1,5 @@
-openai==0.28.0
-langchain==0.0.300
-flask==2.3.3
-black==23.9.0
+openai==0.28.1
+langchain==0.0.305
+flask==3.0.0
+black==23.9.1
 isort==5.12.0
