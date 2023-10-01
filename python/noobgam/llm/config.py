@@ -13,7 +13,7 @@ def _get_openai_llm() -> ChatOpenAI:
     if not org or not api_key:
         raise ValueError("openai misconfiguration")
     return ChatOpenAI(
-        temperature=0.1,
+        temperature=0.3,
         openai_api_key=api_key,
         model_name="gpt-4",
     )
