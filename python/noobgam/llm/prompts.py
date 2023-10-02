@@ -159,6 +159,8 @@ Example output:
 }}]
 ```
 
+Try to fill the gaps and fix any mistakes inferring context from sentences around and do not skip cards if there is something you can create
+
 Current notes:
 {diary}
 """
