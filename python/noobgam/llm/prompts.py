@@ -160,6 +160,7 @@ Example output:
 ```
 
 Try to fill the gaps and fix any mistakes inferring context from sentences around and do not skip cards if there is something you can create
+Current note is supposed to be a note about {language}, if there are placeholders - replace them with {language} words.
 
 Current notes:
 {diary}
