@@ -118,8 +118,9 @@ Example output:
 Try to fill the gaps and fix any mistakes inferring context from sentences around and do not skip cards if there is something you can create.
 Do not forget about reading
 
-Create as many cards as you can, do not skip foreign words if they exist.
+Create as many cards as you can.
 Current note is supposed to be a note about {language}, if there are placeholders - replace them with {language} words.
+If current diary notes seem to follow some grammatical concept include it in sentences.
 
 Current notes:
 {diary}
