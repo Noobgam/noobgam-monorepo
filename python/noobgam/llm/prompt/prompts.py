@@ -1,4 +1,4 @@
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 
 ANKI_FORMAT_EXPLANATION = """Anki cards are used to memorize language patterns and words.
 
@@ -6,24 +6,24 @@ User will ask you to modify and create cards, they follow this JSON format:
 {{
   "Expression": //the expression in the original language
   "Meaning":    //the expression counterpart in english language
-  "Example sentence":    //example sentence in the original language
+  "Example sentence":    //example sentence in the original language, in case of japanese with furigana
   "Example sentence meaning": //approximate english translation of the example sentence
-  "Example sentence reading": //reading of the example sentence (for Japanese only)
 }}
 
 Example 1:
 {{
-  "Expression": "Leere",
-  "Meaning": "empty",
-  "Example sentence": "Ich fühlte eine große Leere in mir."
+  "Expression": "くそ",
+  "Meaning": "damn",
+  "Example sentence": "くそ、 遅[おく]れた！",
+  "Example sentence meaning": "Damn, I'm late!"
 }}
 """
 
 ANKI_CARD_CONVERSATION_TEMPLATE_PROMPT = (
     """You are a helpful language learning assistant.
-You know all languages to some extent and should attempt to help the human to the best of your abilities.
-
-"""
+    You know all languages and should attempt to help the human to the best of your abilities.
+    
+    """
     + ANKI_FORMAT_EXPLANATION
     + """
 
@@ -88,40 +88,9 @@ Conform strictly to the JSON format and do not add additional comments.
 ANKI_CARD_GENERATE_EXAMPLE_SENTENCE = """
 You will be given a card field containing information information, your task is to compose an example sentence that can be used with this word/phrase.
 
-Example input 1:
-Target language: English
-```
-{{
-  "Meaning": "Окно",
-  "Expression": "Window"
-}}
-```
+{examples}
 
-Example output 1:
-```
-{{
-  "Example sentence": "Close the window, it is cold outside!"
-  "Example sentence meaning": "Закрой окно, снаружи холодно!",
-}}
-```
-
-Example input 2:
-Target language: japanese
-```
-{{
-  "Meaning": "the Shinkansen, the bullet train"
-  "Expression": "新幹線",
-  "Reading": "新幹線[しんかんせん]"
-}}
-
-Example output 2:
-```
-{{
-  "Example sentence": "日本で有名な新幹線は、東京から大阪まで早く移動できます。",
-  "Example sentence meaning": "Japan's famous Shinkansen is a fast way to travel from Tokyo to Osaka.",
-  "Example sentence reading": "日[に]本[ほん]で有[ゆ]名[めい]な新[しん]幹[かん]線[せん]は、東[と]京[きょう]から大[おお]阪[さか]まで早[はや]く移[い]動[どう]できます。"
-}}
-```
+{rule_format}
 
 Your current task:
 Target language: {target_language}
@@ -137,29 +106,19 @@ For Japanese remember to add furigana to kanji for reading, do not add furigana 
 If there is a separate attribute for reading, only include furigana there, do not include furigana in example sentence 
 """
 
-CONVERT_DIARY_TO_CARDS = """You will be given an extract from a lesson notes, your task will be to create Anki cards that will be helpful to memorize notes from the lesson. It could be grammar rules or words, your output should be the JSON formatted like the example:
-
-Example input:
-Diary notes, 9.23.2023:
-
-sowohl ... als auch - both ... and
-leere - empty
+CONVERT_DIARY_TO_CARDS_TEMPLATE = """You will be given an extract from a lesson notes, your task will be to create Anki cards that will be helpful to memorize notes from the lesson. It could be grammar rules or words, your output should be the JSON formatted like the example:
 
 Example output:
 ```
-[{{
-  "Expression": "sowohl ... als auch",
-  "Meaning": "both ... and",
-  "Example sentence": "Ich mag sowohl Schokolade als auch Vanille"
-}},
-{{
-  "Expression": "Leere",
-  "Meaning": "empty",
-  "Example sentence": "Nach dem Umzug fühlte das Haus sich voller Leere an."
-}}]
+{examples}
 ```
 
-Try to fill the gaps and fix any mistakes inferring context from sentences around and do not skip cards if there is something you can create
+{rule_format}
+
+Try to fill the gaps and fix any mistakes inferring context from sentences around and do not skip cards if there is something you can create.
+Do not forget about reading
+
+Create as many cards as you can, do not skip foreign words if they exist.
 Current note is supposed to be a note about {language}, if there are placeholders - replace them with {language} words.
 
 Current notes:

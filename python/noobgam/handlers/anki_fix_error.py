@@ -1,7 +1,7 @@
 import json
 
 from noobgam.llm.config import get_anki_chain
-from noobgam.llm.prompts import ANKI_CORRECT_ERRORS
+from noobgam.llm.prompt.prompts import ANKI_CORRECT_ERRORS
 
 
 def handler(event, context):

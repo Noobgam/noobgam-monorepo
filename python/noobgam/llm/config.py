@@ -1,10 +1,10 @@
 import os
 
-from langchain import ConversationChain
+from langchain.chains import ConversationChain
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 
-from noobgam.llm.prompts import ANKI_CARD_CONVERSATION_TEMPLATE
+from noobgam.llm.prompt.prompts import ANKI_CARD_CONVERSATION_TEMPLATE
 
 
 def _get_openai_llm() -> ChatOpenAI:
@@ -19,11 +19,11 @@ def _get_openai_llm() -> ChatOpenAI:
     )
 
 
-def get_anki_chain():
+def get_anki_chain(added_prompt: str = ""):
     memory = ConversationBufferMemory()
     return ConversationChain(
         llm=_get_openai_llm(),
-        prompt=ANKI_CARD_CONVERSATION_TEMPLATE,
+        prompt=ANKI_CARD_CONVERSATION_TEMPLATE + added_prompt,
         verbose=False,
         memory=memory,
     )
