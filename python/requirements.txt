@@ -1,7 +1,7 @@
-openai==0.28.1
-langchain==0.0.305
+openai==1.1.1
+langchain==0.0.331
 flask==3.0.0
-black==23.9.1
+black==23.10.1
 isort==5.12.0
-urllib3==2.0.4
+urllib3==2.0.7
 gevent==23.9.1
