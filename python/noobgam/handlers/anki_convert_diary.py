@@ -20,20 +20,30 @@ class GenerateCardsFromDiary:
     language: str
 
 
-def validate_response(text_resp: str) -> Optional[str]:
+def find_first_code_chunk(text_resp: str) -> Optional[str]:
     l = text_resp.find("```")
     if l == -1:
-        return "Could not find code, make sure it is escaped properly"
+        return None
     r = text_resp.find("```", l + 1)
     if r == -1:
+        return None
+    chunk = text_resp[l + 3: r]
+    if chunk.startswith('json'):
+        chunk = chunk[4:]
+    return chunk
+
+
+def validate_response(text_resp: str) -> Optional[str]:
+    chunk = find_first_code_chunk(text_resp)
+    if not chunk:
         return "Could not find code, make sure it is escaped properly"
     try:
-        val = json.loads(text_resp[l + 3 : r])
+        val = json.loads(chunk)
     except Exception:
         return "Escaped value is not a valid JSON"
 
     for note in val:
-        if not "Expression" in note:
+        if "Expression" not in note:
             return f"No Expression found for {json.dumps(note)}"
 
     return None
@@ -42,11 +52,16 @@ def validate_response(text_resp: str) -> Optional[str]:
 def handler(inp: GenerateCardsFromDiary):
     examples = CONVERT_DIARY_TO_CARDS_EXAMPLES
     rule_format = REQUIRED_FORMAT
+    added_initial_prompt: str
     if inp.language.lower() == "japanese":
         examples = ANKI_JAPANESE_CONVERT_DIARY_TO_CARDS_EXAMPLES
         rule_format = ANKI_JAPANESE_REQUIRED_FORMAT
+        added_initial_prompt = ANKI_JAPANESE_REQUIRED_FORMAT
+    else:
+        added_initial_prompt = "If the language contains complicated cases (Cases in German, padeji in russian) try to incorporate them as well"
+
     anki_chain = get_anki_chain(
-        "\n\n" + ANKI_JAPANESE_REQUIRED_FORMAT
+        "\n\n" + added_initial_prompt
     )
     anki_chain.predict(
         input="Repeat the rules to me one by one, explain how the rules are used in the examples."
@@ -63,6 +78,5 @@ def handler(inp: GenerateCardsFromDiary):
         validator=validate_response,
     )
 
-    l = text_resp.find("```")
-    r = text_resp.find("```", l + 1)
-    return {"cards": json.loads(text_resp[l + 3 : r])}
+    code_chunk = find_first_code_chunk(text_resp)
+    return {"cards": json.loads(code_chunk)}
