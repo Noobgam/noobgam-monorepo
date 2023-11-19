@@ -20,16 +20,20 @@ function stopYoutubeWindow() {
 
 function removeElementByQuery(query) {
     // requires jquery
-    const element = $(query);
-    if (element) {
-        element.remove()
+    let elements = $(query).get();
+    if (elements.length > 0) {
+        for (let element of elements) {
+            element.remove();
+        }
     }
 }
 
 function deleteShorts() {
     removeElementByQuery(`[title='Shorts']`);
     removeElementByQuery(`[tab-title='Shorts']`);
-    removeElementByQuery(`#shorts-container`);
+    // youtube does not care about W3C
+    removeElementByQuery(`[id='shorts-container']`);
+    removeElementByQuery(`[id='reply-button-end']`);
 }
 
 function handleYoutube() {
