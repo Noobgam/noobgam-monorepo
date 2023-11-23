@@ -11,24 +11,27 @@ client = OpenAI(
 )
 
 
-def to_openai_message(message: UserMessage, include_images: bool = False) -> ChatCompletionUserMessageParam:
+def to_openai_message(
+    message: UserMessage, include_images: bool = False
+) -> ChatCompletionUserMessageParam:
     content = [
-        {"type": "text", "text": f"[{message.username}]: {message.msg}"},
+        {
+            "type": "text",
+            "text": f"[{message.username}]: {message.msg} <{len(message.attachment_urls)} images attached>",
+        },
     ]
     if include_images and message.attachment_urls:
         for attached_url in message.attachment_urls:
-            content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": attached_url,
-                    "detail": "high"
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": attached_url, "detail": "high"},
                 }
-            })
+            )
     return {"role": "user", "content": content}
 
 
 def respond_to_message_history(messages: List[UserMessage]) -> str:
-
     ATTACH_IMAGES_COMMAND = "/images"
 
     pre_prompt = f"""
@@ -49,7 +52,10 @@ def respond_to_message_history(messages: List[UserMessage]) -> str:
         messages=[
             {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
         ]
-        + [to_openai_message(message, include_images=include_images) for message in messages],
+        + [
+            to_openai_message(message, include_images=include_images)
+            for message in messages
+        ],
         max_tokens=2000,
     )
     return response.choices[0].message.content
