@@ -20,7 +20,8 @@ def to_openai_message(message: UserMessage, include_images: bool = False) -> Cha
             content.append({
                 "type": "image_url",
                 "image_url": {
-                    "url": attached_url
+                    "url": attached_url,
+                    "detail": "high"
                 }
             })
     return {"role": "user", "content": content}
