@@ -1,24 +1,15 @@
 import os
-from dataclasses import dataclass
 from typing import Dict, List
 
 import discord
 from discord import Message
-from langchain.chains import ConversationChain
 
-from noobgam.llm.config import _get_openai_llm
+from noobgam.discord_bot.models import UserMessage
+from noobgam.discord_bot.openai_utils import respond_to_message_history
 
 CLIENT_ID = 223097750416392192
-
-
-@dataclass
-class UserMessage:
-    username: str
-    msg: str
-
-    @staticmethod
-    def from_message(message: Message):
-        return UserMessage(username=str(message.author.name), msg=message.content)
+if os.environ.get("CLIENT_ID_OVERRIDE"):
+    CLIENT_ID = int(os.environ["CLIENT_ID_OVERRIDE"])
 
 
 message_history: Dict[str, List[UserMessage]] = {}
@@ -35,18 +26,7 @@ def append_message(message: Message):
 async def reply_message(message: Message):
     id = str(message.guild.id) + "_" + str(message.channel.id)
     l = message_history.get(id, [])
-    llm = _get_openai_llm()
-    prompt = f"""
-        You are given a chat history of people, your name is "Noobgam Bot", your messages could also be there
-        {message_history}.
-        
-        You should reply as if you were one of the participants in chat named "Noobgam Bot".
-        
-        Last message sent was: {UserMessage.from_message(message)}.
-        Respond only with the text that you would have responded with, do not add anything additional.
-        """
-
-    res = llm.predict(text=prompt)
+    res = respond_to_message_history(l + [UserMessage.from_message(message)])
     await message.channel.send(res)
     return res
 
