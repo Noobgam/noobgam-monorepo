@@ -15,7 +15,7 @@ def retry_until_valid(
     if not reprompt:
         return response
     else:
-        logging.warning(f'Could not get a response, will reprompt {reprompt}')
+        logging.warning(f"Could not get a response, will reprompt {reprompt}")
 
     for retry_number in range(retries):
         response = chain.predict(input=reprompt)
@@ -24,6 +24,6 @@ def retry_until_valid(
         if not reprompt:
             return response
         else:
-            logging.warning(f'Could not get a response, will reprompt {reprompt}')
+            logging.warning(f"Could not get a response, will reprompt {reprompt}")
 
     raise Exception("Couldn't get valid response")

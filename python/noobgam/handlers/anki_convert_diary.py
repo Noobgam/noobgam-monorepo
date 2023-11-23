@@ -9,7 +9,8 @@ from noobgam.llm.prompt.generic_prompts import (
     REQUIRED_FORMAT,
 )
 from noobgam.llm.prompt.japanese_prompts import (
-    ANKI_JAPANESE_REQUIRED_FORMAT, ANKI_JAPANESE_CONVERT_DIARY_TO_CARDS_EXAMPLES,
+    ANKI_JAPANESE_CONVERT_DIARY_TO_CARDS_EXAMPLES,
+    ANKI_JAPANESE_REQUIRED_FORMAT,
 )
 from noobgam.llm.prompt.prompts import CONVERT_DIARY_TO_CARDS_TEMPLATE
 
@@ -27,8 +28,8 @@ def find_first_code_chunk(text_resp: str) -> Optional[str]:
     r = text_resp.find("```", l + 1)
     if r == -1:
         return None
-    chunk = text_resp[l + 3: r]
-    if chunk.startswith('json'):
+    chunk = text_resp[l + 3 : r]
+    if chunk.startswith("json"):
         chunk = chunk[4:]
     return chunk
 
@@ -60,9 +61,7 @@ def handler(inp: GenerateCardsFromDiary):
     else:
         added_initial_prompt = "If the language contains complicated cases (Cases in German, padeji in russian) try to incorporate them as well"
 
-    anki_chain = get_anki_chain(
-        "\n\n" + added_initial_prompt
-    )
+    anki_chain = get_anki_chain("\n\n" + added_initial_prompt)
     anki_chain.predict(
         input="Repeat the rules to me one by one, explain how the rules are used in the examples."
     )
