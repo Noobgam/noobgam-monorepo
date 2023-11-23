@@ -16,19 +16,30 @@ message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 200
 
 
-def append_message(message: Message):
+async def get_history_from_channel(message: Message) -> List[UserMessage]:
+    key = str(message.guild.id) + "_" + str(message.channel.id)
+    result: List[UserMessage] = message_history.get(key, None)
+    if not result:
+        result = list(reversed([
+            UserMessage.from_message(message)
+            async for message in message.channel.history(limit=MESSAGE_CAP)
+        ]))
+    return result
+
+
+async def append_message(message: Message):
     id = str(message.guild.id) + "_" + str(message.channel.id)
-    l = message_history.get(id, [])
+    l = await get_history_from_channel(message)
     l.append(UserMessage.from_message(message))
     message_history[id] = l[-MESSAGE_CAP:]
 
 
 async def reply_message(message: Message):
-    id = str(message.guild.id) + "_" + str(message.channel.id)
-    l = message_history.get(id, [])
-    res = respond_to_message_history(l + [UserMessage.from_message(message)])
-    await message.channel.send(res)
-    return res
+    user_messages = await get_history_from_channel(message)
+    async with message.channel.typing():
+        res = respond_to_message_history(user_messages)
+        await message.channel.send(res)
+        return res
 
 
 def run_bot():
@@ -49,27 +60,22 @@ def run_bot():
     # Register an event to respond to messages
     @client.event
     async def on_message(message: Message):
+        await append_message(message)
         # Don't respond to ourselves
         if message.author == client.user:
-            append_message(message)
             return
 
         # Respond to "ping" with "pong"
-        print(message.content)
         if message.reference and message.reference.cached_message:
             if message.reference.cached_message.author.id == CLIENT_ID:
                 await reply_message(message)
-                append_message(message)
                 return
 
         if message.mentions and next(
             (mention for mention in message.mentions if mention.id == CLIENT_ID), None
         ):
             await reply_message(message)
-            append_message(message)
             return
-
-        append_message(message)
 
     client.run(os.environ["DISCORD_PERSONAL_TOKEN"])
 

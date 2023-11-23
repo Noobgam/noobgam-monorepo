@@ -15,7 +15,7 @@ class UserMessage:
     def from_message(message: Message):
         return UserMessage(
             username=str(message.author.name),
-            msg=message.content,
+            msg=str(message.clean_content),
             attachment_urls=[
                 attachment.url
                 for attachment in message.attachments
