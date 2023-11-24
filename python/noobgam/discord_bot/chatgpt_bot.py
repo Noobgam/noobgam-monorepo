@@ -3,6 +3,7 @@ from typing import Dict, List
 
 import discord
 from discord import Message
+from discord.abc import Messageable
 
 from noobgam.discord_bot.models import UserMessage
 from noobgam.discord_bot.openai_utils import respond_to_message_history
@@ -11,19 +12,23 @@ CLIENT_ID = 223097750416392192
 if os.environ.get("CLIENT_ID_OVERRIDE"):
     CLIENT_ID = int(os.environ["CLIENT_ID_OVERRIDE"])
 
-
 message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 200
+DISCORD_MESSAGE_LENGTH_CAP = 2000
 
 
 async def get_history_from_channel(message: Message) -> List[UserMessage]:
     key = str(message.guild.id) + "_" + str(message.channel.id)
     result: List[UserMessage] = message_history.get(key, None)
     if not result:
-        result = list(reversed([
-            UserMessage.from_message(message)
-            async for message in message.channel.history(limit=MESSAGE_CAP)
-        ]))
+        result = list(
+            reversed(
+                [
+                    UserMessage.from_message(message)
+                    async for message in message.channel.history(limit=MESSAGE_CAP)
+                ]
+            )
+        )
     return result
 
 
@@ -34,11 +39,34 @@ async def append_message(message: Message):
     message_history[id] = l[-MESSAGE_CAP:]
 
 
+async def send_message(channel: Messageable, message: str):
+    async def send_first_n(n: int):
+        nonlocal message
+
+        await channel.send(message[:n])
+        message = message[n:]
+
+    while len(message) > DISCORD_MESSAGE_LENGTH_CAP:
+        # try to separate the text before code
+        lindex = message.find("```")
+        if 50 < lindex < DISCORD_MESSAGE_LENGTH_CAP:
+            await send_first_n(lindex)
+            continue
+        rindex = message.find("```", lindex + 3)
+        if rindex != -1 and rindex < DISCORD_MESSAGE_LENGTH_CAP:
+            await send_first_n(DISCORD_MESSAGE_LENGTH_CAP + 3)
+            continue
+
+        await send_first_n(DISCORD_MESSAGE_LENGTH_CAP)
+        continue
+    await send_first_n(len(message))
+
+
 async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
-        res = respond_to_message_history(user_messages)
-        await message.channel.send(res)
+        res = await respond_to_message_history(user_messages)
+        await send_message(message.channel, res)
         return res
 
 

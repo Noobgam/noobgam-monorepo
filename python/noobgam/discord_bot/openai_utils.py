@@ -1,12 +1,12 @@
 import os
 from typing import List
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
 from noobgam.discord_bot.models import UserMessage
 
-client = OpenAI(
+client = AsyncOpenAI(
     api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
 )
 
@@ -31,7 +31,7 @@ def to_openai_message(
     return {"role": "user", "content": content}
 
 
-def respond_to_message_history(messages: List[UserMessage]) -> str:
+async def respond_to_message_history(messages: List[UserMessage]) -> str:
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg
     include_images = ATTACH_IMAGES_COMMAND in last_msg
@@ -67,7 +67,7 @@ def respond_to_message_history(messages: List[UserMessage]) -> str:
         # there's a 10k token per minute limit, that's very limiting for 200 messages.
         messages = [messages[0]] + messages[1:][-20:]
 
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="gpt-4-vision-preview" if include_images else "gpt-4-1106-preview",
         messages=messages,
         max_tokens=2000,
