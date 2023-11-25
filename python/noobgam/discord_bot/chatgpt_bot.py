@@ -13,7 +13,7 @@ if os.environ.get("CLIENT_ID_OVERRIDE"):
     CLIENT_ID = int(os.environ["CLIENT_ID_OVERRIDE"])
 
 message_history: Dict[str, List[UserMessage]] = {}
-MESSAGE_CAP = 200
+MESSAGE_CAP = 40
 DISCORD_MESSAGE_LENGTH_CAP = 2000
 
 
