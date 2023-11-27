@@ -14,12 +14,13 @@ client = AsyncOpenAI(
 def to_openai_message(
     message: UserMessage, include_images: bool = False
 ) -> ChatCompletionUserMessageParam:
-    content = [
-        {
-            "type": "text",
-            "text": f"[{message.username}]: {message.msg} <{len(message.attachment_urls)} images attached>",
-        },
-    ]
+    first_text = f"[{message.username}]: {message.msg}"
+    if len(message.attachment_urls):
+        first_text += f"<{len(message.attachment_urls)} images attached>"
+    content = [{
+        "type": "text",
+        "text": first_text
+    }]
     if include_images and message.attachment_urls:
         for attached_url in message.attachment_urls:
             content.append(
@@ -48,13 +49,16 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
     You are participating in the chat under the name of `NoobGPT`
     
     You should reply as if you were one of the participants in chat named "NoobGPT".
+    If you are answering to Erduyta, act as a champion Evelynn from League of Legends. Try to be as seductive as possible when answering.
+    and try to keep in character. Do not do this any other time, only when responding to Erduyta.
+        
+    You will be given a list of chat messages one by one, potentially with attachments.
     
-    You will be given a list of chat messages one by one, potentially with attachments, you can answer as usual.
     
     {images_explanation}
     
     Respond only with the text that you would have responded with, do not add anything additional.
-    You do not need to add the tags with your name or the number of attachments, only the text response.
+    You must not add your name, only add the text response.
     """
 
     messages = [
@@ -71,5 +75,6 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
         model="gpt-4-vision-preview" if include_images else "gpt-4-1106-preview",
         messages=messages,
         max_tokens=2000,
+        temperature=0.6,
     )
     return response.choices[0].message.content

@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import discord
 from discord import Message
@@ -13,7 +13,7 @@ if os.environ.get("CLIENT_ID_OVERRIDE"):
     CLIENT_ID = int(os.environ["CLIENT_ID_OVERRIDE"])
 
 message_history: Dict[str, List[UserMessage]] = {}
-MESSAGE_CAP = 40
+MESSAGE_CAP = 60
 DISCORD_MESSAGE_LENGTH_CAP = 2000
 
 
@@ -21,14 +21,14 @@ async def get_history_from_channel(message: Message) -> List[UserMessage]:
     key = str(message.guild.id) + "_" + str(message.channel.id)
     result: List[UserMessage] = message_history.get(key, None)
     if not result:
-        result = list(
-            reversed(
-                [
-                    UserMessage.from_message(message)
-                    async for message in message.channel.history(limit=MESSAGE_CAP)
-                ]
+        raw_msgs = [
+            message if message.type != discord.MessageType.thread_starter_message else message.reference.resolved
+            async for message in message.channel.history(
+                limit=MESSAGE_CAP,
+                before=message.created_at,
             )
-        )
+        ]
+        result = list(reversed([UserMessage.from_message(message) for message in raw_msgs]))
     return result
 
 
@@ -66,6 +66,10 @@ async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
         res = await respond_to_message_history(user_messages)
+        # this is a mistake from LLM, but we can error-correct it.
+        expected_prefix = '[NoobGPT]: '
+        if res.startswith(expected_prefix):
+            res = res[len(expected_prefix):]
         await send_message(message.channel, res)
         return res
 
