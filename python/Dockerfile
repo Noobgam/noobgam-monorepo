@@ -11,11 +11,6 @@ RUN pip install -r requirements.txt
 
 FROM build as prod
 
-LABEL authors="Noobgam"
-WORKDIR /monorepo
-ENV VIRTUAL_ENV=/monorepo/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
 COPY noobgam monorepo/noobgam
 
 # OPENAI_API_KEY, OPENAI_ORGANIZATION, NOOBGAM_PERSONAL_PASSWORD_SHA256 are required at runtime
