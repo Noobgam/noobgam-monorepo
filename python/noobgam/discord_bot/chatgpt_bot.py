@@ -2,7 +2,7 @@ import os
 from typing import Dict, List, Optional
 
 import discord
-from discord import Message
+from discord import Message, Thread
 from discord.abc import Messageable
 
 from noobgam.discord_bot.models import UserMessage
@@ -22,13 +22,19 @@ async def get_history_from_channel(message: Message) -> List[UserMessage]:
     result: List[UserMessage] = message_history.get(key, None)
     if not result:
         raw_msgs = [
-            message if message.type != discord.MessageType.thread_starter_message else message.reference.resolved
+            message
             async for message in message.channel.history(
                 limit=MESSAGE_CAP,
                 before=message.created_at,
+                oldest_first=True
             )
+            if message.type != discord.MessageType.thread_starter_message
         ]
-        result = list(reversed([UserMessage.from_message(message) for message in raw_msgs]))
+        result = []
+        if isinstance(message.channel, Thread):
+            thread_start: Message = await message.channel.parent.fetch_message(message.channel.id)
+            result += [UserMessage.from_message(thread_start)]
+        result += [UserMessage.from_message(message) for message in raw_msgs]
     return result
 
 
