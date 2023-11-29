@@ -19,6 +19,7 @@ class UserMessage:
             attachment_urls=[
                 attachment.url
                 for attachment in message.attachments
-                if attachment.content_type and attachment.content_type.startswith("image")
+                if attachment.content_type
+                and attachment.content_type.startswith("image")
             ],
         )

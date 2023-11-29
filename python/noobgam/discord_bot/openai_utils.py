@@ -17,10 +17,7 @@ def to_openai_message(
     first_text = f"[{message.username}]: {message.msg}"
     if len(message.attachment_urls):
         first_text += f"<{len(message.attachment_urls)} images attached>"
-    content = [{
-        "type": "text",
-        "text": first_text
-    }]
+    content = [{"type": "text", "text": first_text}]
     if include_images and message.attachment_urls:
         for attached_url in message.attachment_urls:
             content.append(

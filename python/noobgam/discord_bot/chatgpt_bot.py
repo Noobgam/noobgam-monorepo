@@ -24,15 +24,15 @@ async def get_history_from_channel(message: Message) -> List[UserMessage]:
         raw_msgs = [
             message
             async for message in message.channel.history(
-                limit=MESSAGE_CAP,
-                before=message.created_at,
-                oldest_first=True
+                limit=MESSAGE_CAP, before=message.created_at, oldest_first=True
             )
             if message.type != discord.MessageType.thread_starter_message
         ]
         result = []
         if isinstance(message.channel, Thread):
-            thread_start: Message = await message.channel.parent.fetch_message(message.channel.id)
+            thread_start: Message = await message.channel.parent.fetch_message(
+                message.channel.id
+            )
             result += [UserMessage.from_message(thread_start)]
         result += [UserMessage.from_message(message) for message in raw_msgs]
     return result
@@ -73,9 +73,9 @@ async def reply_message(message: Message):
     async with message.channel.typing():
         res = await respond_to_message_history(user_messages)
         # this is a mistake from LLM, but we can error-correct it.
-        expected_prefix = '[NoobGPT]: '
+        expected_prefix = "[NoobGPT]: "
         if res.startswith(expected_prefix):
-            res = res[len(expected_prefix):]
+            res = res[len(expected_prefix) :]
         await send_message(message.channel, res)
         return res
 
