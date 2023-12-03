@@ -27,7 +27,7 @@ client = ScraperAPIClient(api_key=api_key)
 
 class ScrapeResult(TypedDict):
     link: str
-    item_nameid: NotRequired[str]
+    item_nameid: str
 
 SCRAPED_LINKS_PATH = 'data/scraped_links.json'
 
