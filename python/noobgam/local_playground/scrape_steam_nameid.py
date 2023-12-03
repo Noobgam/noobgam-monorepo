@@ -22,6 +22,8 @@ cookies = os.environ["STEAM_COOKIES"]
 api_key = os.environ["SCRAPER_API_KEY"]
 
 PAGE_SIZE = 50
+SCRAPER_API_CONCURRENT_REQUESTS = 20
+
 client = ScraperAPIClient(api_key=api_key)
 
 
@@ -170,7 +172,7 @@ if __name__ == "__main__":
         item_links_queue.put(i)
 
     tt = []
-    for i in range(5):
+    for i in range(SCRAPER_API_CONCURRENT_REQUESTS):
         tt.append(threading.Thread(target=process_links, daemon=True))
     for t in tt:
         t.start()
