@@ -1,1 +1,6 @@
 tika==2.6.0
+playwright
+python-dotenv
+beautifulsoup4
+tqdm
+scraperapi-sdk
