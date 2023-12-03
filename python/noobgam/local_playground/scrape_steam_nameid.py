@@ -6,7 +6,7 @@ import queue
 import re
 import threading
 import time
-from typing import List, Optional, TypedDict, NotRequired
+from typing import List, Optional, TypedDict
 
 import requests
 from bs4 import BeautifulSoup
