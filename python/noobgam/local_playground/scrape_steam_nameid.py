@@ -6,7 +6,7 @@ import queue
 import re
 import threading
 import time
-from typing import List, Optional, TypedDict
+from typing import List, Optional, TypedDict, NotRequired
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,23 +21,27 @@ password = os.environ["STEAM_PASSWORD"]
 cookies = os.environ["STEAM_COOKIES"]
 api_key = os.environ["SCRAPER_API_KEY"]
 
-PAGE_SIZE = 5
+PAGE_SIZE = 50
 client = ScraperAPIClient(api_key=api_key)
 
 
 class ScrapeResult(TypedDict):
     link: str
-    item_nameid: str
+    item_nameid: NotRequired[str]
 
+SCRAPED_LINKS_PATH = 'data/scraped_links.json'
 
-def save_scraped(res: List[ScrapeResult]):
-    with open('data/scraped_links.json', 'w') as f:
+def save_scraped(file_name: str, res: List[ScrapeResult]):
+    import os
+    if not os.path.exists('data'):
+        os.makedirs('data')
+    with open(file_name, 'w') as f:
         f.write(json.dumps(res))
 
 
-def load_scraped() -> List[ScrapeResult]:
+def load_scraped(file_name: str) -> List[ScrapeResult]:
     try:
-        with open('data/scraped_links.json', 'r') as f:
+        with open(file_name, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
         return []
@@ -153,8 +157,8 @@ def process_links():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    item_links = fetch_all_item_links(max_pages=3)
-    already_scraped = load_scraped()
+    item_links = fetch_all_item_links(max_pages=1)
+    already_scraped = load_scraped(SCRAPED_LINKS_PATH)
     scraped_links = set(
         map(lambda x: x["link"], already_scraped)
     )
@@ -176,5 +180,5 @@ if __name__ == "__main__":
         t.join()
 
 
-    save_scraped(already_scraped + list(item_link_results.queue))
+    save_scraped(SCRAPED_LINKS_PATH, already_scraped + list(item_link_results.queue))
 
