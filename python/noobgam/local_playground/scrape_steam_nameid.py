@@ -29,19 +29,22 @@ class ScrapeResult(TypedDict):
     link: str
     item_nameid: str
 
-SCRAPED_LINKS_PATH = 'data/scraped_links.json'
+
+SCRAPED_LINKS_PATH = "data/scraped_links.json"
+
 
 def save_scraped(file_name: str, res: List[ScrapeResult]):
     import os
-    if not os.path.exists('data'):
-        os.makedirs('data')
-    with open(file_name, 'w') as f:
+
+    if not os.path.exists("data"):
+        os.makedirs("data")
+    with open(file_name, "w") as f:
         f.write(json.dumps(res))
 
 
 def load_scraped(file_name: str) -> List[ScrapeResult]:
     try:
-        with open(file_name, 'r') as f:
+        with open(file_name, "r") as f:
             return json.load(f)
     except FileNotFoundError:
         return []
@@ -52,31 +55,27 @@ class BackOffSteamException(Exception):
 
 
 def parse_cookie_to_set(cookie: str) -> List[SetCookieParam]:
-    parts = [
-        part.strip().split('=') for part in cookie.split(';')
+    parts = [part.strip().split("=") for part in cookie.split(";")]
+    return [
+        SetCookieParam(
+            name=part[0],
+            value=part[1],
+            domain=".steamcommunity.com",
+            path="/",
+            sameSite="None",
+            secure=True,
+        )
+        for part in parts
     ]
-    return [SetCookieParam(
-        name=part[0],
-        value=part[1],
-        domain='.steamcommunity.com',
-        path='/',
-        sameSite="None",
-        secure=True,
-    ) for part in parts]
 
 
 def get_headers():
-    return {
-        'Cookie': cookies
-    }
+    return {"Cookie": cookies}
 
 
 def get_item_links(start=0) -> List[str]:
     url = f"https://steamcommunity.com/market/search/render/?appid=730&start={start}&count={PAGE_SIZE}&search_descriptions=0&sort_column=popular&sort_dir=desc"
-    response = requests.get(
-        url,
-        headers=get_headers()
-    )
+    response = requests.get(url, headers=get_headers())
     if response.status_code != 200:
         raise BackOffSteamException(f"response status code {response.status_code}")
     data = response.json()
@@ -96,7 +95,7 @@ def get_item_id(link):
     item_nameid: str
     res = client.get(link)
     full_text = res.text
-    srch = re.search(r'Market_LoadOrderSpread.*\( +(\d+)', full_text)
+    srch = re.search(r"Market_LoadOrderSpread.*\( +(\d+)", full_text)
     item_nameid = srch.group(1)
     return item_nameid
 
@@ -108,7 +107,7 @@ def fetch_all_item_links(max_pages=None):
     while True:
         if max_pages and iteration > max_pages:
             break
-        logging.info(f'Doing iteration {iteration}')
+        logging.info(f"Doing iteration {iteration}")
         iteration += 1
         try:
             this_page = get_item_links(shift)
@@ -147,10 +146,12 @@ def process_links():
             pass
         finally:
             if res:
-                item_link_results.put_nowait(ScrapeResult(
-                    link=link,
-                    item_nameid=res,
-                ))
+                item_link_results.put_nowait(
+                    ScrapeResult(
+                        link=link,
+                        item_nameid=res,
+                    )
+                )
             elif not res and link:
                 item_links_queue.put_nowait(link)
 
@@ -159,9 +160,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     item_links = fetch_all_item_links(max_pages=1)
     already_scraped = load_scraped(SCRAPED_LINKS_PATH)
-    scraped_links = set(
-        map(lambda x: x["link"], already_scraped)
-    )
+    scraped_links = set(map(lambda x: x["link"], already_scraped))
     filtered_item_links = [
         item_link for item_link in item_links if item_link not in scraped_links
     ]
@@ -179,6 +178,4 @@ if __name__ == "__main__":
     for t in tt:
         t.join()
 
-
     save_scraped(SCRAPED_LINKS_PATH, already_scraped + list(item_link_results.queue))
-
