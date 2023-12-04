@@ -1,15 +1,18 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
+// @match        http*://www.quora.com/*
 // @match        http*://www.youtu.be/*
 // @grant        GM_addStyle
 // @require      https://code.jquery.com/jquery-3.7.1.min.js
 // @run-at       document-start
 // ==/UserScript==
+
+// I'm fucking retarded, ain't I?
 
 function stopYoutubeWindow() {
     let dt = new Date();
