@@ -4,6 +4,7 @@ from typing import List
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
+from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.models import UserMessage
 
 client = AsyncOpenAI(
@@ -43,9 +44,9 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
     )
 
     pre_prompt = f"""
-    You are participating in the chat under the name of `NoobGPT`
+    You are participating in the chat under the name of `{MODEL_NAME}`
     
-    You should reply as if you were one of the participants in chat named "NoobGPT".
+    You should reply as if you were one of the participants in chat named "{MODEL_NAME}".
 
     You will be given a list of chat messages one by one, potentially with attachments.
     

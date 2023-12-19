@@ -1,16 +1,15 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import discord
 from discord import Message, Thread
 from discord.abc import Messageable
 
+from noobgam.discord_bot.constants import MODEL_NAME, CLIENT_ID
 from noobgam.discord_bot.models import UserMessage
+from noobgam.discord_bot.ollama_utils import ollama_respond_to_message_history
 from noobgam.discord_bot.openai_utils import respond_to_message_history
 
-CLIENT_ID = 223097750416392192
-if os.environ.get("CLIENT_ID_OVERRIDE"):
-    CLIENT_ID = int(os.environ["CLIENT_ID_OVERRIDE"])
 
 message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 60
@@ -24,10 +23,11 @@ async def get_history_from_channel(message: Message) -> List[UserMessage]:
         raw_msgs = [
             message
             async for message in message.channel.history(
-                limit=MESSAGE_CAP, before=message.created_at, oldest_first=True
+                limit=MESSAGE_CAP, before=message.created_at, oldest_first=False
             )
             if message.type != discord.MessageType.thread_starter_message
         ]
+        raw_msgs = list(reversed(raw_msgs))
         result = []
         if isinstance(message.channel, Thread):
             thread_start: Message = await message.channel.parent.fetch_message(
@@ -71,9 +71,17 @@ async def send_message(channel: Messageable, message: str):
 async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
-        res = await respond_to_message_history(user_messages)
+        if os.getenv('LLAMA_ENABLED') == '1':
+            res = await ollama_respond_to_message_history(user_messages)
+        else:
+            res = await respond_to_message_history(user_messages)
+
+        res = res.lstrip()
         # this is a mistake from LLM, but we can error-correct it.
-        expected_prefix = "[NoobGPT]: "
+        expected_prefix = f"[{MODEL_NAME}]: "
+        if res.startswith(expected_prefix):
+            res = res[len(expected_prefix) :]
+        expected_prefix = f"{MODEL_NAME}: "
         if res.startswith(expected_prefix):
             res = res[len(expected_prefix) :]
         await send_message(message.channel, res)
