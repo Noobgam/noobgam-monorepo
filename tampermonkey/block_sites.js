@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
@@ -32,11 +32,17 @@ function removeElementByQuery(query) {
 }
 
 function deleteShorts() {
+    // youtube does not care about W3C, there are lots of elements with same id.
+
+    // shorts are addictivie.
     removeElementByQuery(`[title='Shorts']`);
-    removeElementByQuery(`[tab-title='Shorts']`);
-    // youtube does not care about W3C
+    removeElementByQuery(`[tab-title='Shorts']`);    
     removeElementByQuery(`[id='shorts-container']`);
+
+    // comments are toxic and braindead.
     removeElementByQuery(`[id='reply-button-end']`);
+    removeElementByQuery(`.ytd-commentbox`)
+    removeElementByQuery(`.ytd-comments-header-renderer[id='simple-box']`)
 }
 
 function handleYoutube() {
