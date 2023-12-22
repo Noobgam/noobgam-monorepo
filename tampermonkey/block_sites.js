@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.7
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
@@ -43,6 +43,7 @@ function deleteShorts() {
     removeElementByQuery(`[id='reply-button-end']`);
     removeElementByQuery(`.ytd-commentbox`)
     removeElementByQuery(`.ytd-comments-header-renderer[id='simple-box']`)
+    removeElementByQuery(`ytd-reel-shelf-renderer`)
 }
 
 function handleYoutube() {
