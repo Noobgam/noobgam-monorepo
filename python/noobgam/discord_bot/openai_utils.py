@@ -5,6 +5,7 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
 from noobgam.discord_bot.constants import MODEL_NAME
+from noobgam.discord_bot.message_utils import filter_messages
 from noobgam.discord_bot.models import UserMessage
 
 client = AsyncOpenAI(
@@ -31,6 +32,7 @@ def to_openai_message(
 
 
 async def respond_to_message_history(messages: List[UserMessage]) -> str:
+    messages = filter_messages(messages)
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg
     include_images = ATTACH_IMAGES_COMMAND in last_msg
@@ -67,7 +69,7 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
         messages = [messages[0]] + messages[1:][-20:]
 
     response = await client.chat.completions.create(
-        model="gpt-4-vision-preview" if include_images else "gpt-4",
+        model="gpt-4-vision-preview" if include_images else "gpt-4-1106-preview",
         messages=messages,
         max_tokens=2000,
         temperature=0.6,
