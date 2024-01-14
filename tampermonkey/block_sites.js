@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.8.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
@@ -70,7 +70,6 @@ function youtubeInject() {
         handlefunc = handleWanikani
     }
     if (handlefunc) {
-        handlefunc();
         setInterval(handlefunc, 200);
     }
 })();
