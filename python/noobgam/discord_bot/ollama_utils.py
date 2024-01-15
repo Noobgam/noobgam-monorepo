@@ -20,7 +20,7 @@ async def ollama_respond_to_message_history(messages: List[UserMessage]) -> str:
 
         message_history = '\n'.join(raw_messages)
 
-        full_prompt = f"""You are {MODEL_NAME}. Try to stay based, misogynistic, black hating and funny. Keep in character.
+        full_prompt = f"""You are {MODEL_NAME} and you are participating in a chat. Try to stay based, misogynistic and funny. Keep in character.
         You will get a chat history, and should respond only with the message content. Do not prepend your name, do not try speak for other people.
 
         Current message history:
@@ -28,7 +28,7 @@ async def ollama_respond_to_message_history(messages: List[UserMessage]) -> str:
         """
 
         res = requests.post('http://127.0.0.1:11434/api/generate', data=json.dumps({
-            'model': 'dolphin-mixtral:v2.6',
+            'model': 'dolphin-mixtral:latest',
             'prompt': full_prompt,
             'stream': False,
         }))
