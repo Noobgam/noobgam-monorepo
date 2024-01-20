@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from playwright._impl._api_structures import SetCookieParam
 from scraper_api import ScraperAPIClient
 from tqdm import tqdm
+from dataclasses import dataclass
 
 load_dotenv()
 username = os.environ["STEAM_USERNAME"]
@@ -22,17 +23,21 @@ cookies = os.environ["STEAM_COOKIES"]
 api_key = os.environ["SCRAPER_API_KEY"]
 
 PAGE_SIZE = 50
-SCRAPER_API_CONCURRENT_REQUESTS = 20
+SCRAPER_API_CONCURRENT_REQUESTS = 5
+
+SEPARATOR = "::::"
 
 client = ScraperAPIClient(api_key=api_key)
 
 
-class ScrapeResult(TypedDict):
+@dataclass
+class ScrapeResult:
+    item_name: str
     link: str
     item_nameid: str
 
 
-SCRAPED_LINKS_PATH = "data/scraped_links.json"
+SCRAPED_LINKS_PATH = "data/scraped_links.csv"
 
 
 def save_scraped(file_name: str, res: List[ScrapeResult]):
@@ -40,14 +45,25 @@ def save_scraped(file_name: str, res: List[ScrapeResult]):
 
     if not os.path.exists("data"):
         os.makedirs("data")
-    with open(file_name, "w") as f:
-        f.write(json.dumps(res))
+    with open(file_name, "w", encoding='utf-8') as f:
+        for r in res:
+            f.write(
+                r.item_name + SEPARATOR + r.item_nameid + SEPARATOR + r.link + '\n'
+            )
 
 
 def load_scraped(file_name: str) -> List[ScrapeResult]:
     try:
         with open(file_name, "r") as f:
-            return json.load(f)
+            res = []
+            for line in f.readlines():
+                arr = line.strip().split(SEPARATOR)
+                res.append(ScrapeResult(
+                    item_name=arr[0],
+                    item_nameid=arr[1],
+                    link=arr[2]
+                ))
+            return res
     except FileNotFoundError:
         return []
 
@@ -77,7 +93,7 @@ def get_headers():
 
 def get_item_links(start=0) -> List[str]:
     url = f"https://steamcommunity.com/market/search/render/?appid=730&start={start}&count={PAGE_SIZE}&search_descriptions=0&sort_column=popular&sort_dir=desc"
-    response = requests.get(url, headers=get_headers())
+    response = client.get(url, headers=get_headers())
     if response.status_code != 200:
         raise BackOffSteamException(f"response status code {response.status_code}")
     data = response.json()
@@ -92,14 +108,17 @@ def get_item_links(start=0) -> List[str]:
     return item_links
 
 
-def get_item_id(link):
+def get_item_data(link):
     logging.info(f"Parsing a link {link}")
     item_nameid: str
     res = client.get(link)
     full_text = res.text
     srch = re.search(r"Market_LoadOrderSpread.*\( +(\d+)", full_text)
     item_nameid = srch.group(1)
-    return item_nameid
+    soup = BeautifulSoup(full_text, "html.parser")
+
+    item_name = soup.find(id='BG_bottom').select('div')[1].select('div')[0].select('div a')[1].text
+    return item_name, item_nameid
 
 
 def fetch_all_item_links(max_pages=None):
@@ -133,36 +152,38 @@ pbar: tqdm
 def process_links():
     while True:
         link: Optional[str] = None
-        res: Optional[str] = None
+        item_name: Optional[str] = None
+        item_id: Optional[str] = None
         try:
             link = item_links_queue.get_nowait()
             logging.info(f"Processing link {link}")
-            res = get_item_id(link)
+            item_name, item_id = get_item_data(link)
             tqdm.update(1)
             item_links_queue.task_done()
-            logging.info(f"ItemId: {link}:{res}")
+            logging.info(f"ItemId: {link}:{item_name}:{item_id}")
         except queue.Empty:
             return
         except Exception as e:
             logging.error(f"Something bad happened, returning link back {e}")
             pass
         finally:
-            if res:
+            if item_id and item_name:
                 item_link_results.put_nowait(
                     ScrapeResult(
                         link=link,
-                        item_nameid=res,
+                        item_nameid=item_id,
+                        item_name=item_name,
                     )
                 )
-            elif not res and link:
+            elif link:
                 item_links_queue.put_nowait(link)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    item_links = fetch_all_item_links(max_pages=1)
+    item_links = fetch_all_item_links(max_pages=10)
     already_scraped = load_scraped(SCRAPED_LINKS_PATH)
-    scraped_links = set(map(lambda x: x["link"], already_scraped))
+    scraped_links = set(map(lambda x: x.link, already_scraped))
     filtered_item_links = [
         item_link for item_link in item_links if item_link not in scraped_links
     ]
