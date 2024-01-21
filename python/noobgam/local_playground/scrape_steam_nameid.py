@@ -6,9 +6,8 @@ import queue
 import re
 import threading
 import time
-from typing import List, Optional, TypedDict
+from typing import List, Optional
 
-import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from playwright._impl._api_structures import SetCookieParam
@@ -23,7 +22,7 @@ cookies = os.environ["STEAM_COOKIES"]
 api_key = os.environ["SCRAPER_API_KEY"]
 
 PAGE_SIZE = 50
-SCRAPER_API_CONCURRENT_REQUESTS = 5
+SCRAPER_API_CONCURRENT_REQUESTS = 20
 
 SEPARATOR = "::::"
 
@@ -54,7 +53,7 @@ def save_scraped(file_name: str, res: List[ScrapeResult]):
 
 def load_scraped(file_name: str) -> List[ScrapeResult]:
     try:
-        with open(file_name, "r") as f:
+        with open(file_name, "r", encoding='utf-8') as f:
             res = []
             for line in f.readlines():
                 arr = line.strip().split(SEPARATOR)
@@ -126,7 +125,7 @@ def fetch_all_item_links(max_pages=None):
     item_links = []
     iteration = 1
     while True:
-        if max_pages and iteration > max_pages:
+        if max_pages is not None and iteration > max_pages:
             break
         logging.info(f"Doing iteration {iteration}")
         iteration += 1
@@ -181,7 +180,10 @@ def process_links():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    item_links = fetch_all_item_links(max_pages=10)
+    item_links = fetch_all_item_links()
+    # with open('data/a.txt', 'r') as f:
+    #     item_links = eval(f.read().strip())
+
     already_scraped = load_scraped(SCRAPED_LINKS_PATH)
     scraped_links = set(map(lambda x: x.link, already_scraped))
     filtered_item_links = [
