@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 from telegram import Update
@@ -52,6 +53,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def run_tg_bot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     app = Application.builder().token(os.environ['TELEGRAM_PERSONAL_TOKEN']).build()
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(MessageHandler(filters.TEXT, handle_message))

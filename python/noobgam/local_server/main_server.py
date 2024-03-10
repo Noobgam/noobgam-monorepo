@@ -16,6 +16,5 @@ if __name__ == "__main__":
 
     tg_bot_thread = Thread(target=run_tg_bot)
     tg_bot_thread.start()
-    tg_bot_thread.join()
 
     http_server.serve_forever()
