@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 LABEL authors="Noobgam"
 
 ENV VIRTUAL_ENV=/monorepo/venv

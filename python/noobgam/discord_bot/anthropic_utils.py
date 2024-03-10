@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+from langchain_community.chat_models import ChatAnthropic
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
@@ -8,30 +9,13 @@ from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.message_utils import filter_messages
 from noobgam.discord_bot.models import UserMessage
 
-client = AsyncOpenAI(
-    api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
+client = ChatAnthropic(
+    api_key=os.environ["ANTHROPIC_API_KEY"]
 )
 
 
-def to_openai_message(
-    message: UserMessage, include_images: bool = False
-) -> ChatCompletionUserMessageParam:
-    first_text = f"[{message.username}]: {message.msg}"
-    if len(message.attachment_urls):
-        first_text += f"<{len(message.attachment_urls)} images attached>"
-    content = [{"type": "text", "text": first_text}]
-    if include_images and message.attachment_urls:
-        for attached_url in message.attachment_urls:
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {"url": attached_url, "detail": "high"},
-                }
-            )
-    return {"role": "user", "content": content}
-
-
 async def respond_to_message_history(messages: List[UserMessage]) -> str:
+    raise NotImplementedError('Not implemented yet')
     messages = filter_messages(messages)
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg
@@ -69,7 +53,7 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
         messages = [messages[0]] + messages[1:][-20:]
 
     response = await client.chat.completions.create(
-        model="gpt-4-vision-preview" if include_images else "gpt-4-turbo-preview",
+        model="gpt-4-vision-preview" if include_images else "gpt-4-1106-preview",
         messages=messages,
         max_tokens=2000,
         temperature=0.6,

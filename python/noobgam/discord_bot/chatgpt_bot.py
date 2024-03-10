@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import Dict, List
 
@@ -71,7 +72,7 @@ async def send_message(channel: Messageable, message: str):
 async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
-        if os.getenv('LLAMA_ENABLED') == '1':
+        if os.getenv("LLAMA_ENABLED") == "1":
             res = await ollama_respond_to_message_history(user_messages)
         else:
             res = await respond_to_message_history(user_messages)

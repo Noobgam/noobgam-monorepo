@@ -44,24 +44,20 @@ def save_scraped(file_name: str, res: List[ScrapeResult]):
 
     if not os.path.exists("data"):
         os.makedirs("data")
-    with open(file_name, "w", encoding='utf-8') as f:
+    with open(file_name, "w", encoding="utf-8") as f:
         for r in res:
-            f.write(
-                r.item_name + SEPARATOR + r.item_nameid + SEPARATOR + r.link + '\n'
-            )
+            f.write(r.item_name + SEPARATOR + r.item_nameid + SEPARATOR + r.link + "\n")
 
 
 def load_scraped(file_name: str) -> List[ScrapeResult]:
     try:
-        with open(file_name, "r", encoding='utf-8') as f:
+        with open(file_name, "r", encoding="utf-8") as f:
             res = []
             for line in f.readlines():
                 arr = line.strip().split(SEPARATOR)
-                res.append(ScrapeResult(
-                    item_name=arr[0],
-                    item_nameid=arr[1],
-                    link=arr[2]
-                ))
+                res.append(
+                    ScrapeResult(item_name=arr[0], item_nameid=arr[1], link=arr[2])
+                )
             return res
     except FileNotFoundError:
         return []
@@ -116,7 +112,13 @@ def get_item_data(link):
     item_nameid = srch.group(1)
     soup = BeautifulSoup(full_text, "html.parser")
 
-    item_name = soup.find(id='BG_bottom').select('div')[1].select('div')[0].select('div a')[1].text
+    item_name = (
+        soup.find(id="BG_bottom")
+        .select("div")[1]
+        .select("div")[0]
+        .select("div a")[1]
+        .text
+    )
     return item_name, item_nameid
 
 
