@@ -18,8 +18,11 @@ msg_hist: Dict[int, List[UserMessage]] = {}
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Welcome.\nEnter password to continue, none of the messages are persisted')
+    msg = 'Welcome'
     uid = update.message.chat.id
+    if uid not in allowlisted_uids:
+        msg += '\nEnter password to continue, none of the messages are persisted'
+    await update.message.reply_text(msg)
     msg_hist[uid] = []
     pass
 
