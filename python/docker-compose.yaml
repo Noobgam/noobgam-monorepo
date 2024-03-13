@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  tg_bot_monorepo:
+    image: 928383298076.dkr.ecr.eu-central-1.amazonaws.com/monorepo-python:latest
+    container_name: tg_chatgpt_monorepo
+    environment:
+      - OPENAI_API_KEY
+      - OPENAI_ORGANIZATION
+      - NOOBGAM_PERSONAL_PASSWORD_SHA256
+      - DISCORD_PERSONAL_TOKEN
+      - TELEGRAM_PERSONAL_PASSWORD
+      - TELEGRAM_PERSONAL_TOKEN
+    entrypoint: python -m noobgam.local_server.tg_bot
+  allround_bot:
+    image: 928383298076.dkr.ecr.eu-central-1.amazonaws.com/monorepo-python:latest
+    container_name: monorepo_main
+    ports:
+      - 5000:5000
+    environment:
+      - OPENAI_API_KEY
+      - OPENAI_ORGANIZATION
+      - NOOBGAM_PERSONAL_PASSWORD_SHA256
+      - DISCORD_PERSONAL_TOKEN
+      - TELEGRAM_PERSONAL_PASSWORD
+      - TELEGRAM_PERSONAL_TOKEN
