@@ -25,7 +25,7 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
         "Pictures can be in any of the messages mentioned previously"
         if include_images
         else f"""
-        If user requests you to take a look at picture advice them to use {ATTACH_IMAGES_COMMAND}, other agent will respond from the name of NoobGPT.
+        If user requests you to take a look at picture advice them to use {ATTACH_IMAGES_COMMAND}, if this text is not present the images are redacted.
         """
     )
 

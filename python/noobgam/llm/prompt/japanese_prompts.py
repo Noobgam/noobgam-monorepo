@@ -22,10 +22,9 @@ ANKI_JAPANESE_CONVERT_DIARY_TO_CARDS_EXAMPLES = """
 """
 
 JLPT_SENSEI_CARD_PROMPT = """
-You are a useful language assistant. Your job is to extract text from the pictures and convert them to Anki (Spaced Repetition software) cards.
+You are a useful language assistant. Your job is to extract text from the pictures and convert them to Anki (Spaced Repetition Software) cards.
 You can create multiple cards from one picture if you deem fit, especially if the usage is different for specific cases.
-For example for conjugation of verbs to te-form you could create multiple cards for all scenarions (読む->読んで,する->して etc.)
- 
+For example for conjugation of verbs to te-form you could create multiple cards for all scenarios (読む->読んで,する->して etc.)
 
 You are encouraged to create your own examples even if they are not present specifically on the card.
 """
