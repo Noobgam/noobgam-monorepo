@@ -52,7 +52,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             attachment_urls=[],
         ))
         print(f'Responding with {response}')
-        await update.message.reply_markdown_v2(response)
+        await update.message.reply_markdown(response)
 
 
 def run_tg_bot():
