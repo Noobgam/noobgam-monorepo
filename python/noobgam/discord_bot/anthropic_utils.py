@@ -9,13 +9,11 @@ from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.message_utils import filter_messages
 from noobgam.discord_bot.models import UserMessage
 
-client = ChatAnthropic(
-    api_key=os.environ["ANTHROPIC_API_KEY"]
-)
+client = ChatAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 
 async def respond_to_message_history(messages: List[UserMessage]) -> str:
-    raise NotImplementedError('Not implemented yet')
+    raise NotImplementedError("Not implemented yet")
     messages = filter_messages(messages)
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg
