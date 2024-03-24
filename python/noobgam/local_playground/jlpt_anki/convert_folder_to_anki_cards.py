@@ -1,3 +1,4 @@
+import json
 import logging
 
 from noobgam.local_playground.jlpt_anki.file_to_anki import convert_file_to_anki
@@ -9,4 +10,8 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_path = input("File path: ")
-    print(convert_file_to_anki(file_path))
+    res = convert_file_to_anki(file_path)
+    print(json.dumps(
+        res,
+        ensure_ascii=False
+    ))

@@ -42,7 +42,7 @@ Thank you for the feedback. I have reviewed the answer and made the necessary co
   "Example sentence meaning": "This is not my book."
 },
 {
-  "MINING": "to be (am, is, are, were, used to)",
+  "Meaning": "to be (am, is, are, were, used to)",
   "Expression": "ではなかった / ではありませんでした",
   "Usage": "Noun + ではなかった / ではありませんでした",
   "Example sentence": "昨日[きのう]の 天[てん] 気[き]は 良[よ]くありませんでした。",
@@ -64,6 +64,7 @@ Corrections made:
 4. Removed extra spaces between hiragana.
 5. Ensured the usage in each card matches the example sentence.
 6. Corrected grammatical mistakes in the example sentences and their explanations.
+7. Make sure that the card form on every card specifically matches the time form. If the card has past tense, meaning should correspond to it
 """
 
 client = anthropic.Anthropic()
