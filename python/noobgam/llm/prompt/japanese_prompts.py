@@ -49,6 +49,13 @@ JLPT_SENSEI_CARD_EXAMPLES = """
   "Usage": "い-adjective + 間に",
   "Example sentence": "若[わか]い 間[あいだ]にたくさん 勉[べん] 強[きょう]した。",
   "Example sentence meaning": "I studied a lot while I was young."
+},
+{
+    "Example sentence": "彼[かれ]は 学[がく] 生[せい]でした。",
+    "Example sentence meaning": "He was a student.",
+    "Expression": "だった / でした",
+    "Meaning": "was / were",
+    "Usage": "Noun + だった / でした"
 }]
 """
 
@@ -57,6 +64,8 @@ You are a useful language assistant. Your job is to extract text from the pictur
 You can create multiple cards from one picture if you deem fit, especially if the usage is different for specific cases.
 For example for conjugation of verbs to te-form you could create multiple cards for all scenarios (読む->読んで,する->して etc.)
 You are allowed to combine furigana for consecutive kanji. For example: 勝手[かって].
+Polite and impolite forms should be on separate forms (For example だ/です).
+Meaning on the card should reflect whether it is polite. Specifically mention words "polite" and "casual" depending on which form is on the card.
 
 You are encouraged to create your own examples even if they are not present specifically on the card, but all the card examples should be present.
 """
@@ -75,6 +84,8 @@ Can you reflect on your answer and make sure that:
 4. Additional spaces between hiragana are not present. They should only be preceding the Kanji, not Kanas.
 5. Ensure that usage of the card is correct and contains the expression in the same form as example sentence does.
 6. The sentences do not contain grammatical mistakes neither in the original, nor in the explanation.
+7. Make sure that the card form on every card specifically matches the time form. If the card has past tense, meaning should correspond to it
+8. Make sure that polite/impolite forms have separate cards for both of them.
 
 Format the response the same way as before, with an explanation of the mistakes done if any and the list of cards escaped with backticks 
 """
