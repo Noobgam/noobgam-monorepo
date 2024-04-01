@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+noobgam/local_playground/jlpt_anki/processed.json
+
 # C extensions
 *.so
 *.env
