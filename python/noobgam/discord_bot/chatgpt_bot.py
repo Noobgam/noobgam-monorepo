@@ -6,11 +6,10 @@ import discord
 from discord import Message, Thread
 from discord.abc import Messageable
 
-from noobgam.discord_bot.constants import MODEL_NAME, CLIENT_ID
+from noobgam.discord_bot.constants import CLIENT_ID, MODEL_NAME
 from noobgam.discord_bot.models import UserMessage
 from noobgam.discord_bot.ollama_utils import ollama_respond_to_message_history
 from noobgam.discord_bot.openai_utils import respond_to_message_history
-
 
 message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 60

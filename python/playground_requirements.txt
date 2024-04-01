@@ -5,3 +5,5 @@ beautifulsoup4
 tqdm
 scraperapi-sdk
 jsonschema
+tqdm
+aiomysql

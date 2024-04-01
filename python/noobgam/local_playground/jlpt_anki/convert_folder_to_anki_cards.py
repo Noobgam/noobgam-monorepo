@@ -1,9 +1,9 @@
 import json
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from noobgam.local_playground.jlpt_anki.file_to_anki import convert_file_to_anki
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 MAX_ANTHROPIC_CONCURRENT_SESSIONS = 3
 
@@ -14,7 +14,7 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_path = input("Root folder path: ")
-    with open('processed.json', 'r', encoding='utf-8') as file:
+    with open("processed.json", "r", encoding="utf-8") as file:
         cache = json.load(file)
 
     processed_files = cache.get(file_path, [])
@@ -24,8 +24,7 @@ if __name__ == "__main__":
         futures_to_filename = {}
         for dirpath, dirnames, filenames in os.walk(file_path):
             files_to_process = [
-                filename for filename in filenames
-                if filename not in processed_files
+                filename for filename in filenames if filename not in processed_files
             ]
             for filename in files_to_process:
                 full_file_path = os.path.join(dirpath, filename)
@@ -38,11 +37,11 @@ if __name__ == "__main__":
                 full_res += future.result()
                 processed_files.append(str(futures_to_filename[future]))
             except Exception as e:
-                logging.error(f'Failed to process {filename}, {e}')
+                logging.error(f"Failed to process {filename}, {e}")
         cache[file_path] = processed_files
-        with open('processed.json', 'w', encoding='utf-8') as file:
+        with open("processed.json", "w", encoding="utf-8") as file:
             json.dump(cache, file, ensure_ascii=False)
-        with open('current_response.txt', 'w', encoding='utf-8') as file:
+        with open("current_response.txt", "w", encoding="utf-8") as file:
             json.dump(full_res, file, ensure_ascii=False)
         # print(json.dumps(
         #     full_res,

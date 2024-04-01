@@ -9,11 +9,11 @@ import anthropic
 from noobgam.handlers.anki_convert_diary import find_first_code_chunk
 from noobgam.llm.prompt.japanese_prompts import (
     ANKI_JAPANESE_REQUIRED_FORMAT,
-    JLPT_SENSEI_CARD_PROMPT,
     JLPT_REFLECT_PROMPT,
     JLPT_SENSEI_CARD_EXAMPLES,
-    JLPT_SENSEI_HUMAN_MESSAGE,
+    JLPT_SENSEI_CARD_PROMPT,
     JLPT_SENSEI_CORRECT_CARDS_PROMPT,
+    JLPT_SENSEI_HUMAN_MESSAGE,
 )
 
 EXAMPLE_CLAUDE_RESPONSE = """

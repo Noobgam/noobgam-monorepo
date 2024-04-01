@@ -1,5 +1,6 @@
 import asyncio
 import os
+from typing import Dict, List
 
 from telegram import Update
 from telegram.ext import (
@@ -9,8 +10,6 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
-from typing import Dict, List
 
 from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.models import UserMessage

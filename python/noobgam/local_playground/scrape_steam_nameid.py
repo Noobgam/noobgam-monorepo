@@ -1,11 +1,11 @@
-# heavily inspiered by https://github.com/blue-codes-yep/AI_STEAM/blob/main/utils/scraper.py
-import json
+# heavily inspired by https://github.com/blue-codes-yep/AI_STEAM/blob/main/utils/scraper.py
 import logging
 import os
 import queue
 import re
 import threading
 import time
+from dataclasses import dataclass
 from typing import List, Optional
 
 from bs4 import BeautifulSoup
@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 from playwright._impl._api_structures import SetCookieParam
 from scraper_api import ScraperAPIClient
 from tqdm import tqdm
-from dataclasses import dataclass
 
 load_dotenv()
 username = os.environ["STEAM_USERNAME"]
