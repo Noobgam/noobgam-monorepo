@@ -13,7 +13,7 @@ from telegram.ext import (
 
 from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.models import UserMessage
-from noobgam.discord_bot.openai_utils import respond_to_message_history_claude
+from noobgam.discord_bot.openai_utils import respond_to_message_history_openai
 
 token = os.environ["TELEGRAM_PERSONAL_TOKEN"]
 psw = os.environ["TELEGRAM_PERSONAL_PASSWORD"]
@@ -50,7 +50,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 attachment_urls=[],
             )
         )
-        response = await respond_to_message_history_claude(msg_hist[uid])
+        response = await respond_to_message_history_openai(msg_hist[uid])
         msg_hist[uid].append(
             UserMessage(
                 username=MODEL_NAME,

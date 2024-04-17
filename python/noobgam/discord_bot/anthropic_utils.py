@@ -1,10 +1,8 @@
 import base64
-import os
 from typing import List
 
 import anthropic
 import httpx
-from anthropic.types import ContentBlock, MessageParam
 
 from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.message_utils import filter_messages
