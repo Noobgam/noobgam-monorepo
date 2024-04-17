@@ -1,15 +1,16 @@
 import asyncio
 import os
-from typing import Dict, List
+from typing import Dict, List, Literal
 
 import discord
 from discord import Message, Thread
 from discord.abc import Messageable
 
+from noobgam.discord_bot.anthropic_utils import respond_to_message_history_claude
 from noobgam.discord_bot.constants import CLIENT_ID, MODEL_NAME
 from noobgam.discord_bot.models import UserMessage
 from noobgam.discord_bot.ollama_utils import ollama_respond_to_message_history
-from noobgam.discord_bot.openai_utils import respond_to_message_history
+from noobgam.discord_bot.openai_utils import respond_to_message_history_openai
 
 message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 60
@@ -68,13 +69,30 @@ async def send_message(channel: Messageable, message: str):
     await send_first_n(len(message))
 
 
+async def route_history(
+    messages: List[UserMessage],
+) -> Literal["LLAMA", "OpenAI", "Anthropic"]:
+    if os.getenv("LLAMA_ENABLED") == "1":
+        return "LLAMA"
+    for msg in reversed(messages):
+        if "/use-openai" in msg.msg:
+            return "OpenAI"
+        if "/use-anthropic" in msg.msg:
+            return "Anthropic"
+    return "OpenAI"
+
+
 async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
-        if os.getenv("LLAMA_ENABLED") == "1":
+        route = await route_history(user_messages)
+        res: str
+        if route == "LLAMA":
             res = await ollama_respond_to_message_history(user_messages)
-        else:
-            res = await respond_to_message_history(user_messages)
+        elif route == "OpenAI":
+            res = await respond_to_message_history_openai(user_messages)
+        elif route == "Anthropic":
+            res = await respond_to_message_history_claude(user_messages)
 
         res = res.lstrip()
         # this is a mistake from LLM, but we can error-correct it.

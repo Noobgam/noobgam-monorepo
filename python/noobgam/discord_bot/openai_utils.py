@@ -31,7 +31,7 @@ def to_openai_message(
     return {"role": "user", "content": content}
 
 
-async def respond_to_message_history(messages: List[UserMessage]) -> str:
+async def respond_to_message_history_openai(messages: List[UserMessage]) -> str:
     messages = filter_messages(messages)
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg

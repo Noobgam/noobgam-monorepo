@@ -1,19 +1,43 @@
+import base64
 import os
 from typing import List
 
-from langchain_community.chat_models import ChatAnthropic
-from openai import AsyncOpenAI
-from openai.types.chat import ChatCompletionUserMessageParam
+import anthropic
+import httpx
+from anthropic.types import ContentBlock, MessageParam
 
 from noobgam.discord_bot.constants import MODEL_NAME
 from noobgam.discord_bot.message_utils import filter_messages
 from noobgam.discord_bot.models import UserMessage
 
-client = ChatAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+client = anthropic.Anthropic()
 
 
-async def respond_to_message_history(messages: List[UserMessage]) -> str:
-    raise NotImplementedError("Not implemented yet")
+def url_to_base64_image(url: str) -> str:
+    return base64.b64encode(httpx.get(url).content).decode("utf-8")
+
+
+def to_anthropic_message_contents(message: UserMessage, include_images: bool = False):
+    first_text = f"[{message.username}]: {message.msg}"
+    if len(message.attachment_urls):
+        first_text += f"<{len(message.attachment_urls)} images attached>"
+    contents = [{"type": "text", "text": first_text}]
+    if include_images and message.attachment_urls:
+        for attached_image in message.image_attachments:
+            contents.append(
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": attached_image.content_type,
+                        "data": url_to_base64_image(attached_image.url),
+                    },
+                }
+            )
+    return contents
+
+
+async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
     messages = filter_messages(messages)
     ATTACH_IMAGES_COMMAND = "/images"
     last_msg = messages[-1].msg
@@ -40,20 +64,23 @@ async def respond_to_message_history(messages: List[UserMessage]) -> str:
     You must not add your name, only add the text response.
     """
 
-    messages = [
-        {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
-    ] + [
-        to_openai_message(message, include_images=include_images)
+    contents = [
+        to_anthropic_message_contents(message, include_images=include_images)
         for message in messages
     ]
     if include_images:
         # there's a 10k token per minute limit, that's very limiting for 200 messages.
-        messages = [messages[0]] + messages[1:][-20:]
+        contents = [contents[0]] + contents[1:][-20:]
 
-    response = await client.chat.completions.create(
-        model="gpt-4-vision-preview" if include_images else "gpt-4-1106-preview",
-        messages=messages,
-        max_tokens=2000,
-        temperature=0.6,
+    def flatten(nested_list):
+        return [item for sublist in nested_list for item in sublist]
+
+    contents = flatten(contents)
+    new_resp = client.messages.create(
+        model="claude-3-opus-20240229",
+        max_tokens=2500,
+        temperature=0.0,
+        system=pre_prompt,
+        messages=[{"role": "user", "content": contents}],
     )
-    return response.choices[0].message.content
+    return new_resp.content[0].text
