@@ -48,6 +48,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 username=update.message.chat.username or update.message.chat.first_name,
                 msg=update.message.text or "",
                 attachment_urls=[],
+                image_attachments=[]
             )
         )
         response = await respond_to_message_history_openai(msg_hist[uid])
@@ -56,6 +57,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 username=MODEL_NAME,
                 msg=response,
                 attachment_urls=[],
+                image_attachments=[]
             )
         )
         print(f"Responding with {response}")
