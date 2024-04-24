@@ -1,18 +1,15 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.8.1
+// @version      0.9.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
 // @match        http*://www.youtu.be/*
 // @match        http*://www.wanikani.com/*
 // @grant        GM_addStyle
-// @require      https://code.jquery.com/jquery-3.7.1.min.js
 // @run-at       document-start
 // ==/UserScript==
-
-// I'm fucking retarded, ain't I?
 
 function stopWindow() {
     let dt = new Date();
@@ -22,33 +19,25 @@ function stopWindow() {
 }
 
 function removeElementByQuery(query) {
-    // requires jquery
-    let elements = $(query).get();
-    if (elements.length > 0) {
-        for (let element of elements) {
-            element.remove();
-        }
-    }
+    // Use document.querySelectorAll to handle the removals instead of jQuery
+    let elements = document.querySelectorAll(query);
+    elements.forEach(element => element.remove());
 }
 
 function deleteShorts() {
-    // youtube does not care about W3C, there are lots of elements with same id.
-
-    // shorts are addictivie.
+    // Handling YouTube Shorts and other distracting elements
     removeElementByQuery(`[title='Shorts']`);
-    removeElementByQuery(`[tab-title='Shorts']`);    
+    removeElementByQuery(`[tab-title='Shorts']`);
     removeElementByQuery(`[id='shorts-container']`);
-
-    // comments are toxic and braindead.
     removeElementByQuery(`[id='reply-button-end']`);
-    removeElementByQuery(`.ytd-commentbox`)
-    removeElementByQuery(`.ytd-comments-header-renderer[id='simple-box']`)
-    removeElementByQuery(`ytd-reel-shelf-renderer`)
+    removeElementByQuery(`.ytd-commentbox`);
+    removeElementByQuery(`.ytd-comments-header-renderer[id='simple-box']`);
+    removeElementByQuery(`ytd-reel-shelf-renderer`);
 }
 
 function handleWanikani() {
-    // this is an unnecessary distration
-    removeElementByQuery(`.quiz-statistics`)
+    // Remove quiz statistics from WaniKani
+    removeElementByQuery(`.quiz-statistics`);
 }
 
 function handleYoutube() {
@@ -57,7 +46,8 @@ function handleYoutube() {
 }
 
 function youtubeInject() {
-    setInterval(handleYoutube, 200)
+    // Setting interval to handle YouTube repeatedly
+    setInterval(handleYoutube, 200);
 }
 
 (function() {
@@ -67,7 +57,7 @@ function youtubeInject() {
     if (hostname.endsWith("youtube.com") || hostname.endsWith("youtu.be")) {
         handlefunc = handleYoutube;
     } else if (hostname.endsWith("wanikani.com")) {
-        handlefunc = handleWanikani
+        handlefunc = handleWanikani;
     }
     if (handlefunc) {
         setInterval(handlefunc, 200);
