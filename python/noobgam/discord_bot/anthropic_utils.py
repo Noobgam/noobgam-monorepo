@@ -32,6 +32,17 @@ def to_anthropic_message_contents(message: UserMessage, include_images: bool = F
                     },
                 }
             )
+        for image_base64 in message.base64_images:
+            contents.append(
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_base64,
+                    },
+                }
+            )
     return contents
 
 

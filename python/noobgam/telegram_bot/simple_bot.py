@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import os
 from typing import Dict, List
 
@@ -33,35 +34,45 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
     uid = update.message.chat.id
     allowed = uid in allowlisted_uids
-    if not allowed and psw in text:
-        await update.message.reply_text("Password acknowledged")
-        allowlisted_uids.add(uid)
-        msg_hist[uid] = []
-    elif not allowed:
+    if not allowed:
+        if update.message.text and (psw in update.message.text):
+            await update.message.reply_text("Password acknowledged")
+            allowlisted_uids.add(uid)
+            msg_hist[uid] = []
+            return
+    if not allowed:
         await update.message.reply_text("Enter password to continue")
-    else:
-        msg_hist[uid].append(
-            UserMessage(
-                username=update.message.chat.username or update.message.chat.first_name,
-                msg=update.message.text or "",
-                attachment_urls=[],
-                image_attachments=[]
-            )
+        return
+    photos = update.message.photo or []
+    image_attachments: List[str] = []
+    if photos:
+        file_id = photos[-1].file_id
+        new_file = await context.bot.get_file(file_id)
+        in_memory_img = await new_file.download_as_bytearray()
+        image_attachments.append(base64.b64encode(in_memory_img).decode("utf-8"))
+    msg_hist[uid].append(
+        UserMessage(
+            username=update.message.chat.username or update.message.chat.first_name,
+            msg=update.message.text or "",
+            attachment_urls=[],
+            image_attachments=[],
+            base64_images=image_attachments,
         )
-        response = await respond_to_message_history_openai(msg_hist[uid])
-        msg_hist[uid].append(
-            UserMessage(
-                username=MODEL_NAME,
-                msg=response,
-                attachment_urls=[],
-                image_attachments=[]
-            )
+    )
+    response = await respond_to_message_history_openai(msg_hist[uid])
+    msg_hist[uid].append(
+        UserMessage(
+            username=MODEL_NAME,
+            msg=response,
+            attachment_urls=[],
+            image_attachments=[],
+            base64_images=[],
         )
-        print(f"Responding with {response}")
-        await update.message.reply_markdown(response)
+    )
+    print(f"Responding with {response}")
+    await update.message.reply_markdown(response)
 
 
 def run_tg_bot():
@@ -69,7 +80,7 @@ def run_tg_bot():
     asyncio.set_event_loop(loop)
     app = Application.builder().token(os.environ["TELEGRAM_PERSONAL_TOKEN"]).build()
     app.add_handler(CommandHandler("start", start_command))
-    app.add_handler(MessageHandler(filters.TEXT, handle_message))
+    app.add_handler(MessageHandler(filters.ALL, handle_message))
 
     print("Polling")
     app.run_polling(poll_interval=3)

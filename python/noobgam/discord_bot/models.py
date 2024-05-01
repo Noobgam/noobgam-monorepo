@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from discord import Attachment, Message
 
@@ -11,6 +11,7 @@ class UserMessage:
     # list of urls to pictures
     attachment_urls: List[str]
     image_attachments: List[Attachment]
+    base64_images: Optional[List[str]] = None
 
     @staticmethod
     def from_message(message: Message):
@@ -29,4 +30,5 @@ class UserMessage:
                 if attachment.content_type
                 and attachment.content_type.startswith("image")
             ],
+            base64_images=[],
         )

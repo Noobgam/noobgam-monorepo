@@ -20,12 +20,19 @@ def to_openai_message(
     if len(message.attachment_urls):
         first_text += f"<{len(message.attachment_urls)} images attached>"
     content = [{"type": "text", "text": first_text}]
-    if include_images and message.attachment_urls:
+    if include_images:
         for attached_url in message.attachment_urls:
             content.append(
                 {
                     "type": "image_url",
                     "image_url": {"url": attached_url, "detail": "high"},
+                }
+            )
+        for base64_image in message.base64_images:
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
                 }
             )
     return {"role": "user", "content": content}
