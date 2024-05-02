@@ -13,7 +13,7 @@ from noobgam.discord_bot.openai_utils import respond_to_message_history_openai
 
 message_history: Dict[str, List[UserMessage]] = {}
 MESSAGE_CAP = 60
-DISCORD_MESSAGE_LENGTH_CAP = 2000
+DISCORD_MESSAGE_LENGTH_CAP = 1800
 
 
 async def get_history_from_channel(message: Message) -> List[UserMessage]:
