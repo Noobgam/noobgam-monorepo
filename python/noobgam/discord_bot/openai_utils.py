@@ -76,7 +76,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage]) -> str:
         messages = [messages[0]] + messages[1:][-20:]
 
     response = await client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=messages,
         max_tokens=2000,
         temperature=0.6,
