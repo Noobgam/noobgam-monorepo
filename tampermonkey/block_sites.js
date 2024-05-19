@@ -33,6 +33,8 @@ function deleteShorts() {
     removeElementByQuery(`.ytd-commentbox`);
     removeElementByQuery(`.ytd-comments-header-renderer[id='simple-box']`);
     removeElementByQuery(`ytd-reel-shelf-renderer`);
+    // kekw. Youtube you're so funny.
+    removeElementByQuery(`ytd-rich-shelf-renderer`);
 }
 
 function handleWanikani() {
