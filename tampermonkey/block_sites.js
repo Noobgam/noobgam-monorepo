@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.9.1
+// @version      0.10.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
