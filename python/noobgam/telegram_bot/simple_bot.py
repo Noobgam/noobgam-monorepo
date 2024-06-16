@@ -55,7 +55,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg_hist[uid].append(
         UserMessage(
             username=update.message.chat.username or update.message.chat.first_name,
-            msg=update.message.text or "",
+            msg=update.message.caption or update.message.text,
             attachment_urls=[],
             image_attachments=[],
             base64_images=image_attachments,
