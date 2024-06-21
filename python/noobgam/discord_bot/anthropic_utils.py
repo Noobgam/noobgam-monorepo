@@ -62,7 +62,7 @@ async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
 
     contents = flatten(contents)
     new_resp = client.messages.create(
-        model="claude-3-5-claude-20240620",
+        model="claude-3-5-sonnet-20240620",
         max_tokens=2500,
         temperature=0.3,
         system=pre_prompt,
