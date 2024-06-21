@@ -19,6 +19,7 @@ services:
     ports:
       - 5000:5000
     environment:
+      - ANTHROPIC_API_KEY
       - OPENAI_API_KEY
       - OPENAI_ORGANIZATION
       - NOOBGAM_PERSONAL_PASSWORD_SHA256
