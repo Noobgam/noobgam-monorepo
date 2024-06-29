@@ -11,6 +11,7 @@ def retry_until_valid(
     validator: Callable[[str], Optional[str]] = lambda x: None,
 ):
     response = chain.invokes(prompt)
+    logging.info(f"Got response {response} from LLM")
     reprompt = validator(response)
     if not reprompt:
         return response
