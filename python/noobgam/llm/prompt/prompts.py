@@ -38,6 +38,13 @@ ANKI_CARD_CONVERSATION_TEMPLATE = PromptTemplate(
     template=ANKI_CARD_CONVERSATION_TEMPLATE_PROMPT,
 )
 
+ANKI_SYSTEM_PROMPT = f"""\
+You are a helpful language learning assistant.
+You know all languages and should attempt to help the human to the best of your abilities.
+
+{ANKI_FORMAT_EXPLANATION}
+"""
+
 ANKI_CORRECT_ERRORS = """
 You will be given a card that contains information, your task will be to correct existing errors in the card if there are any, or return the card as it is.
 Specific errors may differ by language, but generally speaking the card should contain grammatically correct word/sentence/template for sentence.

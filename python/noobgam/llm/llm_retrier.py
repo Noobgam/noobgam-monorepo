@@ -1,16 +1,16 @@
 import logging
 from typing import Callable, Optional
 
-from langchain.chains import ConversationChain
+from noobgam.llm.chain import ConversationHistoryChain
 
 
 def retry_until_valid(
     retries: int,
-    chain: ConversationChain,
+    chain: ConversationHistoryChain,
     prompt: str,
     validator: Callable[[str], Optional[str]] = lambda x: None,
 ):
-    response = chain.predict(input=prompt)
+    response = chain.invokes(prompt)
     reprompt = validator(response)
     if not reprompt:
         return response
@@ -18,7 +18,7 @@ def retry_until_valid(
         logging.warning(f"Could not get a response, will reprompt {reprompt}")
 
     for retry_number in range(retries):
-        response = chain.predict(input=reprompt)
+        response = chain.invokes(reprompt)
         reprompt = validator(response)
 
         if not reprompt:

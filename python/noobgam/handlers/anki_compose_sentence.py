@@ -27,4 +27,4 @@ def handler(inp: GenerateCardInput):
         examples=examples,
         rule_format=rule_format,
     )
-    return anki_chain.predict(input=prompt_text)
+    return anki_chain.invoke(prompt_text)

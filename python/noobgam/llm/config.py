@@ -1,10 +1,12 @@
 import os
 
-from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI, ChatAnthropic
-from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.messages import SystemMessage
 
-from noobgam.llm.prompt.prompts import ANKI_CARD_CONVERSATION_TEMPLATE
+from noobgam.llm.chain import ConversationHistoryChain
+from noobgam.llm.prompt.prompts import ANKI_SYSTEM_PROMPT
 
 
 def _get_openai_llm() -> ChatOpenAI:
@@ -20,17 +22,18 @@ def _get_openai_llm() -> ChatOpenAI:
 
 
 def _get_anthropic_llm() -> ChatAnthropic:
-    return ChatOpenAI(
+    return ChatAnthropic(
         temperature=0.1,
         model_name="claude-3-5-sonnet-20240620",
     )
 
 
-def get_anki_chain(added_prompt: str = ""):
-    memory = ConversationBufferMemory()
-    return ConversationChain(
-        llm=_get_anthropic_llm(),
-        prompt=ANKI_CARD_CONVERSATION_TEMPLATE + added_prompt,
-        verbose=False,
-        memory=memory,
+def get_anki_chain(added_prompt: str = "") -> ConversationHistoryChain:
+    llm = _get_anthropic_llm()
+    chat_history = InMemoryChatMessageHistory(messages=[
+        SystemMessage(content=ANKI_SYSTEM_PROMPT + added_prompt),
+    ])
+    return ConversationHistoryChain(
+        chat_history=chat_history,
+        llm=llm
     )

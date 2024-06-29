@@ -7,8 +7,8 @@ from noobgam.llm.prompt.prompts import ANKI_CORRECT_ERRORS
 def handler(event, context):
     anki_chain = get_anki_chain()
     print(
-        anki_chain.predict(
-            input=ANKI_CORRECT_ERRORS.format(
+        anki_chain.invoke(
+            ANKI_CORRECT_ERRORS.format(
                 payload=json.dumps(
                     {
                         "target_languages": ["Japanese"],

@@ -62,8 +62,8 @@ def handler(inp: GenerateCardsFromDiary):
         added_initial_prompt = "If the language contains complicated cases (Cases in German, padeji in russian) try to incorporate them as well"
 
     anki_chain = get_anki_chain("\n\n" + added_initial_prompt)
-    anki_chain.predict(
-        input="Repeat the rules to me one by one, explain how the rules are used in the examples."
+    anki_chain.invoke(
+        "Repeat the rules to me one by one, explain how the rules are used in the examples."
     )
     text_resp = retry_until_valid(
         retries=3,
