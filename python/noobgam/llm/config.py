@@ -17,7 +17,7 @@ def _get_openai_llm() -> ChatOpenAI:
     return ChatOpenAI(
         temperature=0.1,
         openai_api_key=api_key,
-        model_name="gpt-4o",
+        model_name="gpt-4o-2024-08-06",
     )
 
 
