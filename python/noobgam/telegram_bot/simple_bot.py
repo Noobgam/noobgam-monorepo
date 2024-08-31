@@ -3,6 +3,7 @@ import base64
 import os
 from typing import Dict, List
 
+from openai import AsyncOpenAI
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -31,6 +32,39 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
     msg_hist[uid] = []
     pass
+
+
+async def generate_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "Please provide a prompt for the image generation, e.g., /generate_image a white siamese cat")
+        return
+
+    # Join all the args to form the prompt
+    prompt = " ".join(context.args)
+    await update.message.reply_text(f"Generating image for prompt: [{prompt}], please wait")
+    client = AsyncOpenAI(
+        api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
+    )
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1024x1024",
+            quality="hd",
+            n=1,
+        )
+
+        # Retrieve image URL
+        image_url = (await response).data[0].url
+
+        # Send image URL to user
+        await update.message.reply_text(f"Here is your generated image: {image_url}")
+    except Exception as e:
+        # Handle any errors
+        await update.message.reply_text(f"An error occurred: {e}")
+
+
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -80,6 +114,7 @@ def run_tg_bot():
     asyncio.set_event_loop(loop)
     app = Application.builder().token(os.environ["TELEGRAM_PERSONAL_TOKEN"]).build()
     app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CommandHandler("generate_image", generate_image, has_args=1))
     app.add_handler(MessageHandler(filters.ALL, handle_message))
 
     print("Polling")
