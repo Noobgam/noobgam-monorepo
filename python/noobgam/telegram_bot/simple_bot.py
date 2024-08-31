@@ -34,14 +34,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     pass
 
 
-async def generate_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
+async def generate_image_impl(update: Update, prompt: str):
+    if not prompt:
         await update.message.reply_text(
             "Please provide a prompt for the image generation, e.g., /generate_image a white siamese cat")
         return
-
-    # Join all the args to form the prompt
-    prompt = " ".join(context.args)
     await update.message.reply_text(f"Generating image for prompt: [{prompt}], please wait")
     client = AsyncOpenAI(
         api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
@@ -65,6 +62,27 @@ async def generate_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"An error occurred: {e}")
 
 
+async def generate_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.message.chat.id
+    allowed = uid in allowlisted_uids
+    if not allowed:
+        if update.message.text and (psw in update.message.text):
+            await update.message.reply_text("Password acknowledged")
+            allowlisted_uids.add(uid)
+            msg_hist[uid] = []
+            return
+    if not allowed:
+        await update.message.reply_text("Enter password to continue")
+        return
+
+    if not context.args:
+        await update.message.reply_text(
+            "Please provide a prompt for the image generation, e.g., /generate_image a white siamese cat")
+        return
+
+    # Join all the args to form the prompt
+    prompt = " ".join(context.args)
+    return await generate_image_impl(update, prompt)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,6 +97,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not allowed:
         await update.message.reply_text("Enter password to continue")
         return
+    if update.message.text and update.message.text.startswith("/generate_image"):
+        return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
     photos = update.message.photo or []
     image_attachments: List[str] = []
     if photos:
