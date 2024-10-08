@@ -44,18 +44,20 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     pre_prompt = PRE_CHAT_PROMPT
 
     mapped_messages: List[ChatCompletionUserMessageParam]
-    if model_id == "o1-preview":
+    stripped_model = model_id in ["o1-preview", "o1-mini"]
+
+    if stripped_model:
         mapped_messages = [
             {"role": "user", "content": [{"type": "text", "text": pre_prompt}]},
         ] + [
-            to_openai_message(message, include_images=(model_id != "o1-preview"))
+            to_openai_message(message, include_images=False)
             for message in messages
         ]
     else:
         mapped_messages = [
             {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
         ] + [
-            to_openai_message(message, include_images=(model_id != "o1-preview"))
+            to_openai_message(message, include_images=True)
             for message in messages
         ]
 
@@ -63,6 +65,6 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
         model=model_id,
         messages=mapped_messages,
         max_completion_tokens=4000,
-        temperature=1 if model_id == "o1-preview" else 0.6,
+        temperature=1 if stripped_model else 0.6,
     )
     return response.choices[0].message.content
