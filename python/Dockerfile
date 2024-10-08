@@ -12,6 +12,7 @@ WORKDIR /monorepo
 COPY pyproject.toml poetry.lock* /monorepo/
 
 # Configure Poetry to create the virtual environment inside the project directory
+# --no-root to keep venv stable
 RUN poetry config virtualenvs.in-project true && \
     poetry install --only main --no-root
 
@@ -25,10 +26,11 @@ RUN apk add --no-cache openssl-dev libffi-dev
 
 WORKDIR /monorepo
 
-# Copy the project and the virtual environment from the build stage
-COPY --from=build /monorepo /monorepo
+# copy venv separately to separate layers
+COPY --from=build /monorepo/.venv /monorepo/.venv
 
-# Set the virtual environment as the default Python environment
+COPY --from=build /monorepo/noobgam /monorepo/noobgam
+
 ENV PATH="/monorepo/.venv/bin:$PATH"
 
 EXPOSE 5000
