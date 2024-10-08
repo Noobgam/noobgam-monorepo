@@ -1,4 +1,5 @@
-FROM python:3.12-alpine
+# Build Stage
+FROM python:3.12-alpine AS build
 LABEL authors="Noobgam"
 
 RUN apk update && \
@@ -10,11 +11,25 @@ WORKDIR /monorepo
 
 COPY pyproject.toml poetry.lock* /monorepo/
 
-RUN poetry config virtualenvs.create false && poetry install --only main --no-root
+# Configure Poetry to create the virtual environment inside the project directory
+RUN poetry config virtualenvs.in-project true && \
+    poetry install --only main --no-root
 
 COPY noobgam noobgam
 
-# OPENAI_API_KEY, OPENAI_ORGANIZATION, NOOBGAM_PERSONAL_PASSWORD_SHA256 are required at runtime
+# Runtime Stage
+FROM python:3.12-alpine
+LABEL authors="Noobgam"
+
+RUN apk add --no-cache openssl-dev libffi-dev
+
+WORKDIR /monorepo
+
+# Copy the project and the virtual environment from the build stage
+COPY --from=build /monorepo /monorepo
+
+# Set the virtual environment as the default Python environment
+ENV PATH="/monorepo/.venv/bin:$PATH"
 
 EXPOSE 5000
 
