@@ -22,7 +22,7 @@ psw = os.environ["TELEGRAM_PERSONAL_PASSWORD"]
 
 allowlisted_uids = set()
 msg_hist: Dict[int, List[UserMessage]] = {}
-models_selected: Dict[int, str]
+models_selected: Dict[int, str] = {}
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,7 +101,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text and update.message.text.startswith("/generate_image"):
         return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
 
-    model_selected = models_selected[uid] or "gpt-4o-2024-08-06"
+    model_selected = models_selected.get(uid, "gpt-4o-2024-08-06")
 
     if update.message.text and update.message.text.startswith("/get_model"):
         return await update.message.reply_text(model_selected)
@@ -146,7 +146,7 @@ def run_tg_bot():
     app = Application.builder().token(os.environ["TELEGRAM_PERSONAL_TOKEN"]).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("generate_image", generate_image, has_args=1))
-    app.add_handler(CommandHandler("get_model", handle_message, has_args=1))
+    app.add_handler(CommandHandler("get_model", handle_message))
     app.add_handler(CommandHandler("set_model", handle_message, has_args=1))
     app.add_handler(MessageHandler(filters.ALL, handle_message))
 

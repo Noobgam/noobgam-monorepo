@@ -5,6 +5,9 @@ from pydantic.v1 import BaseModel
 
 
 class ConversationHistoryChain(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     chat_history: InMemoryChatMessageHistory
     llm: BaseChatModel
 
