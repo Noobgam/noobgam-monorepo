@@ -68,30 +68,40 @@ async def send_message(channel: Messageable, message: str):
     await send_first_n(len(message))
 
 
-async def route_history(
+async def get_model(
     messages: List[UserMessage],
-) -> Literal["LLAMA", "OpenAI", "Anthropic"]:
+) -> str:
     if os.getenv("LLAMA_ENABLED") == "1":
-        return "LLAMA"
+        return "llama"
     for msg in reversed(messages):
+        if "/set-model" in msg.msg:
+            return msg.msg[len("/set-model "):].strip()
         if "/use-openai" in msg.msg:
-            return "OpenAI"
+            return "openai-gpt-4o"
         if "/use-anthropic" in msg.msg:
-            return "Anthropic"
-    return "OpenAI"
+            return "anthropic-claude-3-5-sonnet-20240620"
+    return "openai-gpt-4o"
 
 
 async def reply_message(message: Message):
     user_messages = await get_history_from_channel(message)
     async with message.channel.typing():
-        route = await route_history(user_messages)
+        model = await get_model(user_messages)
+        if "/get-model" in message.content:
+            return await send_message(message.channel, model)
         res: str
-        if route == "LLAMA":
-            res = await ollama_respond_to_message_history(user_messages)
-        elif route == "OpenAI":
-            res = await respond_to_message_history_openai(user_messages)
-        elif route == "Anthropic":
-            res = await respond_to_message_history_claude(user_messages)
+        try:
+            if model.startswith("llama"):
+                res = await ollama_respond_to_message_history(user_messages)
+            elif model.startswith("openai"):
+                res = await respond_to_message_history_openai(user_messages, model.split("-", 1)[1])
+            elif model.startswith("anthropic"):
+                res = await respond_to_message_history_claude(user_messages, model.split("-", 1)[1])
+            else:
+                raise NotImplemented()
+        except Exception as e:
+            await send_message(message.channel, str(e))
+            raise e
 
         res = res.lstrip()
         # this is a mistake from LLM, but we can error-correct it.

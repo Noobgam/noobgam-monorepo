@@ -46,7 +46,7 @@ def to_anthropic_message_contents(message: UserMessage, include_images: bool = F
     return contents
 
 
-async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
+async def respond_to_message_history_claude(messages: List[UserMessage], model_id) -> str:
     messages = filter_messages(messages)
     include_images = True
 
@@ -62,7 +62,7 @@ async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
 
     contents = flatten(contents)
     new_resp = client.messages.create(
-        model="claude-3-5-sonnet-20240620",
+        model=model_id,
         max_tokens=2500,
         temperature=0.3,
         system=pre_prompt,

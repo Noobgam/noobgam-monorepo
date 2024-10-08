@@ -22,6 +22,7 @@ psw = os.environ["TELEGRAM_PERSONAL_PASSWORD"]
 
 allowlisted_uids = set()
 msg_hist: Dict[int, List[UserMessage]] = {}
+models_selected: Dict[int, str]
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -99,6 +100,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     if update.message.text and update.message.text.startswith("/generate_image"):
         return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
+
+    model_selected = models_selected[uid] or "gpt-4o-2024-08-06"
+
+    if update.message.text and update.message.text.startswith("/get_model"):
+        return await update.message.reply_text(model_selected)
+
+    if update.message.text and update.message.text.startswith("/set_model"):
+        models_selected[uid] = (update.message.text[len("/set_model") + 1:]).strip()
+        return await update.message.reply_text(f"Model set to {models_selected[uid]}")
+
     photos = update.message.photo or []
     image_attachments: List[str] = []
     if photos:
@@ -115,7 +126,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             base64_images=image_attachments,
         )
     )
-    response = await respond_to_message_history_openai(msg_hist[uid])
+    response = await respond_to_message_history_openai(msg_hist[uid], model_selected)
     msg_hist[uid].append(
         UserMessage(
             username=MODEL_NAME,
@@ -135,6 +146,8 @@ def run_tg_bot():
     app = Application.builder().token(os.environ["TELEGRAM_PERSONAL_TOKEN"]).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("generate_image", generate_image, has_args=1))
+    app.add_handler(CommandHandler("get_model", handle_message, has_args=1))
+    app.add_handler(CommandHandler("set_model", handle_message, has_args=1))
     app.add_handler(MessageHandler(filters.ALL, handle_message))
 
     print("Polling")
