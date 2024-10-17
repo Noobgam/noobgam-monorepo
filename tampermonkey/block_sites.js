@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.10.1
+// @version      0.11.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
@@ -11,9 +11,9 @@
 // @run-at       document-start
 // ==/UserScript==
 
-function stopWindow() {
+function stopWindowAtNight() {
     let dt = new Date();
-    if (dt.getHours() > 0 && dt.getHours() < 12) {
+    if (dt.getHours() >= 23 || dt.getHours() < 10) {
         window.stop();
     }
 }
@@ -44,7 +44,7 @@ function handleWanikani() {
 
 function handleYoutube() {
     deleteShorts();
-    stopWindow();
+    stopWindowAtNight();
 }
 
 function youtubeInject() {
