@@ -24,7 +24,7 @@ def _get_openai_llm() -> ChatOpenAI:
 def _get_anthropic_llm() -> ChatAnthropic:
     return ChatAnthropic(
         temperature=0.1,
-        model_name="claude-3-5-sonnet-20240620",
+        model_name="claude-3-5-sonnet-20241022",
         max_tokens_to_sample=4096,
     )
 

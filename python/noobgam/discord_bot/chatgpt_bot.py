@@ -79,7 +79,7 @@ async def get_model(
         if "/use-openai" in msg.msg:
             return "openai-gpt-4o"
         if "/use-anthropic" in msg.msg:
-            return "anthropic-claude-3-5-sonnet-20240620"
+            return "anthropic-claude-3-5-sonnet-20241022"
     return "openai-gpt-4o"
 
 
