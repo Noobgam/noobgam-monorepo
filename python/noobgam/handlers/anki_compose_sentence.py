@@ -1,10 +1,6 @@
 import json
 from dataclasses import dataclass
 
-from noobgam.llm.config import get_anki_chain
-from noobgam.llm.prompt.japanese_prompts import ANKI_JAPANESE_REQUIRED_FORMAT
-from noobgam.llm.prompt.prompts import ANKI_CARD_GENERATE_EXAMPLE_SENTENCE
-
 
 @dataclass
 class GenerateCardInput:
@@ -14,6 +10,10 @@ class GenerateCardInput:
 
 
 def handler(inp: GenerateCardInput):
+    from noobgam.llm.config import get_anki_chain
+    from noobgam.llm.prompt.japanese_prompts import ANKI_JAPANESE_REQUIRED_FORMAT
+    from noobgam.llm.prompt.prompts import ANKI_CARD_GENERATE_EXAMPLE_SENTENCE
+
     examples = ""
     rule_format = ""
     if inp.target_language.lower() == "japanese":

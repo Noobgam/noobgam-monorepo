@@ -1,7 +1,5 @@
 import os
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.messages import SystemMessage
 
@@ -9,7 +7,8 @@ from noobgam.llm.chain import ConversationHistoryChain
 from noobgam.llm.prompt.prompts import ANKI_SYSTEM_PROMPT
 
 
-def _get_openai_llm() -> ChatOpenAI:
+def _get_openai_llm():
+    from langchain_openai import ChatOpenAI
     org = os.getenv("OPENAI_ORGANIZATION")
     api_key = os.getenv("OPENAI_API_KEY")
     if not org or not api_key:
@@ -21,7 +20,8 @@ def _get_openai_llm() -> ChatOpenAI:
     )
 
 
-def _get_anthropic_llm() -> ChatAnthropic:
+def _get_anthropic_llm():
+    from langchain_anthropic import ChatAnthropic
     return ChatAnthropic(
         temperature=0.1,
         model_name="claude-3-5-sonnet-20240620",

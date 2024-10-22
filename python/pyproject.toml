@@ -20,6 +20,9 @@ python-telegram-bot = "21.6"
 langchain-anthropic = "0.2.3"
 langchain-openai = "0.2.2"
 pydantic = "2.7.4"
+pynacl = "1.5.0"
+discord-ext-listening = { git = "https://github.com/Sheppsu/discord-ext-listening", branch = "main" }
+
 
 [tool.poetry.group.playground.dependencies]
 tika = "2.6.0"
