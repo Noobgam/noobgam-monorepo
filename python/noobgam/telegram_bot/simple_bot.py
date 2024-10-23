@@ -121,8 +121,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         UserMessage(
             username=update.message.chat.username or update.message.chat.first_name,
             msg=update.message.caption or update.message.text,
-            attachment_urls=[],
             image_attachments=[],
+            text_attachments=[],
             base64_images=image_attachments,
         )
     )
@@ -131,8 +131,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         UserMessage(
             username=MODEL_NAME,
             msg=response,
-            attachment_urls=[],
             image_attachments=[],
+            text_attachments=[],
             base64_images=[],
         )
     )

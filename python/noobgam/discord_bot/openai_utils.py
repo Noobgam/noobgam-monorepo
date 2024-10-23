@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import httpx
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
@@ -17,24 +18,25 @@ def to_openai_message(
     message: UserMessage, include_images: bool = False
 ) -> ChatCompletionUserMessageParam:
     first_text = f"[{message.username}]: {message.msg}"
-    if len(message.attachment_urls):
-        first_text += f"<{len(message.attachment_urls)} images attached>"
+    if len(message.image_attachments):
+        first_text += f"<{len(message.image_attachments)} images attached>"
     content = [{"type": "text", "text": first_text}]
     if include_images:
-        for attached_url in message.attachment_urls:
+        for attached in message.image_attachments:
             content.append(
                 {
                     "type": "image_url",
-                    "image_url": {"url": attached_url, "detail": "high"},
+                    "image_url": {"url": attached.url, "detail": "high"},
                 }
             )
-        for base64_image in message.base64_images:
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-                }
-            )
+    for attached in message.text_attachments:
+        attachment_content = httpx.get(attached.url).content
+        content.append(
+            {
+                "type": "text",
+                "text": f"Attached file: {attached.filename}\n Content:\n{attachment_content}",
+            }
+        )
     return {"role": "user", "content": content}
 
 
