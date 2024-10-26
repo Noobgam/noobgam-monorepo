@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.11.1
+// @version      0.12.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
@@ -10,13 +10,6 @@
 // @grant        GM_addStyle
 // @run-at       document-start
 // ==/UserScript==
-
-function stopWindowAtNight() {
-    let dt = new Date();
-    if (dt.getHours() >= 23 || dt.getHours() < 10) {
-        window.stop();
-    }
-}
 
 function removeElementByQuery(query) {
     // Use document.querySelectorAll to handle the removals instead of jQuery
@@ -43,8 +36,7 @@ function handleWanikani() {
 }
 
 function handleYoutube() {
-    deleteShorts();
-    stopWindowAtNight();
+    deleteShorts()
 }
 
 function youtubeInject() {
