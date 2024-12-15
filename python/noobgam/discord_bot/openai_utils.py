@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import httpx
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 
@@ -17,43 +18,55 @@ def to_openai_message(
     message: UserMessage, include_images: bool = False
 ) -> ChatCompletionUserMessageParam:
     first_text = f"[{message.username}]: {message.msg}"
-    if len(message.attachment_urls):
-        first_text += f"<{len(message.attachment_urls)} images attached>"
+    if len(message.image_attachments):
+        first_text += f"<{len(message.image_attachments)} images attached>"
     content = [{"type": "text", "text": first_text}]
     if include_images:
-        for attached_url in message.attachment_urls:
+        for attached in message.image_attachments:
             content.append(
                 {
                     "type": "image_url",
-                    "image_url": {"url": attached_url, "detail": "high"},
+                    "image_url": {"url": attached.url, "detail": "high"},
                 }
             )
-        for base64_image in message.base64_images:
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-                }
-            )
+    for attached in message.text_attachments:
+        attachment_content = httpx.get(attached.url).content
+        content.append(
+            {
+                "type": "text",
+                "text": f"Attached file: {attached.filename}\n Content:\n{attachment_content}",
+            }
+        )
     return {"role": "user", "content": content}
 
 
-async def respond_to_message_history_openai(messages: List[UserMessage]) -> str:
+async def respond_to_message_history_openai(messages: List[UserMessage], model_id: str) -> str:
     messages = filter_messages(messages)
 
     pre_prompt = PRE_CHAT_PROMPT
 
-    messages = [
-        {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
-    ] + [
-        to_openai_message(message, include_images=True)
-        for message in messages
-    ]
+    mapped_messages: List[ChatCompletionUserMessageParam]
+    stripped_model = model_id in ["o1-preview", "o1-mini"]
+
+    if stripped_model:
+        mapped_messages = [
+            {"role": "user", "content": [{"type": "text", "text": pre_prompt}]},
+        ] + [
+            to_openai_message(message, include_images=False)
+            for message in messages
+        ]
+    else:
+        mapped_messages = [
+            {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
+        ] + [
+            to_openai_message(message, include_images=True)
+            for message in messages
+        ]
 
     response = await client.chat.completions.create(
-        model="gpt-4o-2024-08-06",
-        messages=messages,
-        max_tokens=4000,
-        temperature=0.6,
+        model=model_id,
+        messages=mapped_messages,
+        max_completion_tokens=4000,
+        temperature=1 if stripped_model else 0.6,
     )
     return response.choices[0].message.content

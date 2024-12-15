@@ -17,10 +17,10 @@ def url_to_base64_image(url: str) -> str:
 
 def to_anthropic_message_contents(message: UserMessage, include_images: bool = False):
     first_text = f"[{message.username}]: {message.msg}"
-    if len(message.attachment_urls):
-        first_text += f"<{len(message.attachment_urls)} images attached>"
+    if len(message.image_attachments):
+        first_text += f"<{len(message.image_attachments)} images attached>"
     contents = [{"type": "text", "text": first_text}]
-    if include_images and message.attachment_urls:
+    if include_images and message.image_attachments:
         for attached_image in message.image_attachments:
             contents.append(
                 {
@@ -43,10 +43,18 @@ def to_anthropic_message_contents(message: UserMessage, include_images: bool = F
                     },
                 }
             )
+    for attached in message.text_attachments:
+        attachment_content = httpx.get(attached.url).content
+        contents.append(
+            {
+                "type": "text",
+                "text": f"Attached file: {attached.filename}\n Content:\n{attachment_content}",
+            }
+        )
     return contents
 
 
-async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
+async def respond_to_message_history_claude(messages: List[UserMessage], model_id) -> str:
     messages = filter_messages(messages)
     include_images = True
 
@@ -62,7 +70,7 @@ async def respond_to_message_history_claude(messages: List[UserMessage]) -> str:
 
     contents = flatten(contents)
     new_resp = client.messages.create(
-        model="claude-3-5-sonnet-20240620",
+        model=model_id,
         max_tokens=2500,
         temperature=0.3,
         system=pre_prompt,
