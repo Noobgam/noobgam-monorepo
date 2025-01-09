@@ -6,26 +6,24 @@ import re
 import threading
 import time
 from dataclasses import dataclass
+import requests
 from typing import List, Optional
 
+import random
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from playwright._impl._api_structures import SetCookieParam
-from scraper_api import ScraperAPIClient
 from tqdm import tqdm
 
 load_dotenv()
 username = os.environ["STEAM_USERNAME"]
 password = os.environ["STEAM_PASSWORD"]
-cookies = os.environ["STEAM_COOKIES"]
-api_key = os.environ["SCRAPER_API_KEY"]
+#cookies = os.environ["STEAM_COOKIES"]
 
 PAGE_SIZE = 50
-SCRAPER_API_CONCURRENT_REQUESTS = 20
+CONCURRENCY = 1
 
 SEPARATOR = "::::"
-
-client = ScraperAPIClient(api_key=api_key)
 
 
 @dataclass
@@ -34,6 +32,9 @@ class ScrapeResult:
     link: str
     item_nameid: str
 
+
+with open("data/http_proxies.txt") as proxies_file:
+    http_proxies = proxies_file.read().splitlines()
 
 SCRAPED_LINKS_PATH = "data/scraped_links.csv"
 
@@ -82,12 +83,14 @@ def parse_cookie_to_set(cookie: str) -> List[SetCookieParam]:
 
 
 def get_headers():
-    return {"Cookie": cookies}
+    return {}
+    #return {"Cookie": cookies}
 
 
 def get_item_links(start=0) -> List[str]:
     url = f"https://steamcommunity.com/market/search/render/?appid=730&start={start}&count={PAGE_SIZE}&search_descriptions=0&sort_column=popular&sort_dir=desc"
-    response = client.get(url, headers=get_headers())
+    proxy = {"https": random.choice(http_proxies)}
+    response = requests.get(url, headers=get_headers(), proxies=proxy)
     if response.status_code != 200:
         raise BackOffSteamException(f"response status code {response.status_code}")
     data = response.json()
@@ -105,7 +108,8 @@ def get_item_links(start=0) -> List[str]:
 def get_item_data(link):
     logging.info(f"Parsing a link {link}")
     item_nameid: str
-    res = client.get(link)
+    proxy = {"https": random.choice(http_proxies)}
+    res = requests.get(link, headers=get_headers(), proxies=proxy)
     full_text = res.text
     srch = re.search(r"Market_LoadOrderSpread.*\( +(\d+)", full_text)
     item_nameid = srch.group(1)
@@ -181,9 +185,14 @@ def process_links():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    item_links = fetch_all_item_links()
-    # with open('data/a.txt', 'r') as f:
-    #     item_links = eval(f.read().strip())
+    if os.path.exists('data/a.txt'):
+        with open('data/a.txt', 'r') as f:
+            item_links = [ll.strip() for ll in f.readlines()]
+    else:
+        item_links = fetch_all_item_links()
+        with open('data/a.txt', 'w') as f:
+            for item_link in item_links:
+                f.write(item_link + "\n")
 
     already_scraped = load_scraped(SCRAPED_LINKS_PATH)
     scraped_links = set(map(lambda x: x.link, already_scraped))
@@ -196,7 +205,7 @@ if __name__ == "__main__":
         item_links_queue.put(i)
 
     tt = []
-    for i in range(SCRAPER_API_CONCURRENT_REQUESTS):
+    for i in range(CONCURRENCY):
         tt.append(threading.Thread(target=process_links, daemon=True))
     for t in tt:
         t.start()
