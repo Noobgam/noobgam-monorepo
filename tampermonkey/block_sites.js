@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Block sites
 // @namespace    http://tampermonkey.net/
-// @version      0.12.1
+// @version      0.13.1
 // @description  Block sites
 // @author       Noobgam
 // @match        http*://www.youtube.com/*
 // @match        http*://www.youtu.be/*
+// @match        http*://wanikani.com/*
 // @match        http*://www.wanikani.com/*
 // @grant        GM_addStyle
 // @run-at       document-start
