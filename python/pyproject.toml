@@ -20,6 +20,8 @@ python-telegram-bot = "21.6"
 langchain-anthropic = "0.2.3"
 langchain-openai = "0.2.2"
 pydantic = "2.7.4"
+google-generativeai = { git = "https://github.com/google-gemini/generative-ai-python", rev = "imagen" }
+Pillow = "11.1.0"
 
 [tool.poetry.group.playground.dependencies]
 tika = "2.6.0"

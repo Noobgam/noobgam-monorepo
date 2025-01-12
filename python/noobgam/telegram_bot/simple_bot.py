@@ -3,7 +3,9 @@ import base64
 import logging
 import os
 import pickle
+from io import BytesIO
 from typing import Dict, List
+import google.generativeai as genai
 
 from openai import AsyncOpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -22,6 +24,8 @@ from noobgam.discord_bot.openai_utils import respond_to_message_history_openai
 token = os.environ["TELEGRAM_PERSONAL_TOKEN"]
 psw = os.environ["TELEGRAM_PERSONAL_PASSWORD"]
 
+genai.configure(api_key=os.environ["GENAI_API_KEY"])
+
 state = os.environ["STATE_FILE"]
 
 STATE_LOCK = asyncio.Lock()
@@ -29,10 +33,10 @@ STATE_LOCK = asyncio.Lock()
 allowlisted_uids = set()
 msg_hist: Dict[int, List[UserMessage]] = {}
 models_selected: Dict[int, str] = {}
-
+image_models_selected: Dict[int, str] = {}
 
 def restore_state():
-    global allowlisted_uids, msg_hist, models_selected
+    global allowlisted_uids, msg_hist, models_selected, image_models_selected
     if not os.path.exists(state):
         logging.info("No data on startup")
         return
@@ -42,6 +46,7 @@ def restore_state():
             allowlisted_uids = data.get("allowlisted_uids", set())
             msg_hist = data.get("msg_hist", {})
             models_selected = data.get("models_selected", {})
+            image_models_selected = data.get("image_models_selected", {})
         logging.info("State restored from file.")
     except Exception as e:
         logging.info(f"Could not restore state: {e}")
@@ -53,6 +58,7 @@ async def write_state():
             "allowlisted_uids": allowlisted_uids,
             "msg_hist": msg_hist,
             "models_selected": models_selected,
+            "image_models_selected": image_models_selected,
         }
         try:
             with open(state, "wb") as f:
@@ -78,27 +84,41 @@ async def generate_image_impl(update: Update, prompt: str):
             "Please provide a prompt for the image generation, e.g., /generate_image a white siamese cat")
         return
     await update.message.reply_text(f"Generating image for prompt: [{prompt}], please wait")
-    client = AsyncOpenAI(
-        api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
-    )
-    try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="hd",
-            n=1,
+    image_model = image_models_selected.get(update.message.chat.id, "dallee")
+    if image_model == "dallee":
+        client = AsyncOpenAI(
+            api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
         )
+        try:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="hd",
+                n=1,
+            )
 
-        # Retrieve image URL
-        image_url = (await response).data[0].url
+            # Retrieve image URL
+            image_url = (await response).data[0].url
 
-        # Send image URL to user
-        await update.message.reply_text(f"Here is your generated image: {image_url}")
-        await write_state()
-    except Exception as e:
-        # Handle any errors
-        await update.message.reply_text(f"An error occurred: {e}")
+            # Send image URL to user
+            await update.message.reply_text(f"Here is your generated image: {image_url}")
+            await write_state()
+        except Exception as e:
+            # Handle any errors
+            await update.message.reply_text(f"An error occurred: {e}")
+    else:
+        imagen = genai.ImageGenerationModel("imagen-3.0-generate-001")
+
+        result = imagen.generate_images(
+            prompt=prompt,
+            number_of_images=2,
+            safety_filter_level="block_only_high",
+            person_generation="allow_adult",
+            aspect_ratio="1:1",
+        )
+        for img in result.images:
+            await update.message.reply_photo(photo=BytesIO(img._image_bytes))
 
 
 async def set_model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -114,6 +134,26 @@ async def set_model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(model, callback_data=f"set_model:{model}")]
         for model in ["gpt-4o-2024-08-06", "gpt-4o-2024-11-20", "o1-preview", "o1-mini"]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Send the model picker
+    await update.message.reply_text("Please choose a model:", reply_markup=reply_markup)
+
+
+async def set_image_model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Show the user a list of models to pick from.
+    """
+    uid = update.message.chat.id
+    if uid not in allowlisted_uids:
+        await update.message.reply_text("You are not authorized to use this command. Please enter the password first.")
+        return
+
+    # Create an inline keyboard with model options
+    keyboard = [
+        [InlineKeyboardButton(model, callback_data=f"set_image_model:{model}")]
+        for model in ["dallee", "imagen-3.0-generate-001"]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -140,6 +180,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await query.answer(f"Model set to {selected_model}")
         await query.edit_message_text(f"Model successfully set to: {selected_model}")
+        await write_state()
+    elif callback_data.startswith("set_image_model:"):
+        selected_model = callback_data.split(":", 1)[1]
+        image_models_selected[uid] = selected_model
+
+        await query.answer(f"Image model set to {selected_model}")
+        await query.edit_message_text(f"Image model successfully set to: {selected_model}")
         await write_state()
     else:
         await query.answer("Invalid selection.")
@@ -181,9 +228,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
 
     model_selected = models_selected.get(uid, "gpt-4o-2024-08-06")
+    image_model_selected = image_models_selected.get(uid, "dallee")
 
     if update.message.text and update.message.text.startswith("/get_model"):
         return await update.message.reply_text(model_selected)
+
+    if update.message.text and update.message.text.startswith("/get_image_model"):
+        return await update.message.reply_text(image_model_selected)
 
     if update.message.text and update.message.text.startswith("/set_model"):
         models_selected[uid] = (update.message.text[len("/set_model") + 1:]).strip()
@@ -229,6 +280,8 @@ def run_tg_bot():
     app.add_handler(CommandHandler("generate_image", generate_image, has_args=1))
     app.add_handler(CommandHandler("get_model", handle_message))
     app.add_handler(CommandHandler("set_model", set_model_command))
+    app.add_handler(CommandHandler("get_image_model", handle_message))
+    app.add_handler(CommandHandler("set_image_model", set_image_model_command))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.ALL, handle_message))
     logging.info("Polling")
