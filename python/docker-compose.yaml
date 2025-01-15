@@ -10,6 +10,7 @@ services:
       - NOOBGAM_PERSONAL_PASSWORD_SHA256
       - DISCORD_PERSONAL_TOKEN
       - TELEGRAM_PERSONAL_PASSWORD
+      - OPENROUTER_API_KEY
       - TELEGRAM_PERSONAL_TOKEN
       - STATE_FILE=/monorepo/data/state.bin
     entrypoint: python -m noobgam.local_server.tg_bot
@@ -28,6 +29,7 @@ services:
       - OPENAI_ORGANIZATION
       - NOOBGAM_PERSONAL_PASSWORD_SHA256
       - DISCORD_PERSONAL_TOKEN
+      - OPENROUTER_API_KEY
       - TELEGRAM_PERSONAL_PASSWORD
       - TELEGRAM_PERSONAL_TOKEN
 
