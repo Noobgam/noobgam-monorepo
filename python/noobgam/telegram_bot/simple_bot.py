@@ -259,7 +259,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     if update.message.chat.id < 0:
         # in group chats react on tag
-        if "@noobgpt" not in (update.message.text or update.message.caption):
+        if "@noobgamgpt_bot" not in (update.message.text or update.message.caption):
             await write_state()
             return
     response = await respond_to_message_history_openai(msg_hist[uid], model_selected)
