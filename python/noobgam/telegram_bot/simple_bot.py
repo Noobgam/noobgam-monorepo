@@ -224,6 +224,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not allowed:
         await update.message.reply_text("Enter password to continue")
         return
+
     if update.message.text and update.message.text.startswith("/generate_image"):
         return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
 
@@ -256,6 +257,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             base64_images=image_attachments,
         )
     )
+    if update.message.chat.id < 0:
+        # in group chats react on tag
+        if "@noobgpt" not in (update.message.text or update.message.caption):
+            await write_state()
+            return
     response = await respond_to_message_history_openai(msg_hist[uid], model_selected)
     msg_hist[uid].append(
         UserMessage(
@@ -268,7 +274,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     logging.info(f"Responding with {response}")
     await update.message.reply_markdown(response)
-    await write_state()
 
 
 def run_tg_bot():
