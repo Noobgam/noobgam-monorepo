@@ -29,6 +29,13 @@ def to_openai_message(
                     "image_url": {"url": attached.url, "detail": "high"},
                 }
             )
+        for attached in message.base64_images:
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{attached}"},
+                }
+            )
     for attached in message.text_attachments:
         attachment_content = httpx.get(attached.url).content
         content.append(
