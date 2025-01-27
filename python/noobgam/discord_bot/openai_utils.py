@@ -61,6 +61,10 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
 
     mapped_messages: List[ChatCompletionUserMessageParam]
     stripped_model = model_id in ["o1-preview", "o1-mini"]
+    openrouter_models = {
+        'r1-deepseek': 'deepseek/deepseek-r1',
+        '3.5-sonnet': 'anthropic/claude-3.5-sonnet:beta'
+    }
 
     if stripped_model or model_id == "r1-deepseek":
         mapped_messages = [
@@ -77,8 +81,11 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
             for message in messages
         ]
 
-    cl = client if model_id != 'r1-deepseek' else openrouter_client
-    model_id = model_id if model_id != 'r1-deepseek' else 'deepseek/deepseek-r1'
+    openrouter_model = openrouter_models.get(model_id, None)
+    cl = client
+    if openrouter_model:
+        cl = openrouter_client
+        model_id = openrouter_model
 
     response = await cl.chat.completions.create(
         model=model_id,
