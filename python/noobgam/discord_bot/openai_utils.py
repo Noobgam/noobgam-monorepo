@@ -12,6 +12,13 @@ from noobgam.discord_bot.prompt_templates import PRE_CHAT_PROMPT
 client = AsyncOpenAI(
     api_key=os.environ["OPENAI_API_KEY"], organization=os.environ["OPENAI_ORGANIZATION"]
 )
+common_params = {
+    "base_url": "https://openrouter.ai/api/v1",
+    "api_key": os.environ["OPENROUTER_API_KEY"],
+}
+openrouter_client = AsyncOpenAI(
+    **common_params
+)
 
 
 def to_openai_message(
@@ -55,7 +62,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     mapped_messages: List[ChatCompletionUserMessageParam]
     stripped_model = model_id in ["o1-preview", "o1-mini"]
 
-    if stripped_model:
+    if stripped_model or model_id == "r1-deepseek":
         mapped_messages = [
             {"role": "user", "content": [{"type": "text", "text": pre_prompt}]},
         ] + [
@@ -70,7 +77,10 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
             for message in messages
         ]
 
-    response = await client.chat.completions.create(
+    cl = client if model_id != 'r1-deepseek' else openrouter_client
+    model_id = model_id if model_id != 'r1-deepseek' else 'deepseek/deepseek-r1'
+
+    response = await cl.chat.completions.create(
         model=model_id,
         messages=mapped_messages,
         max_completion_tokens=4000,
