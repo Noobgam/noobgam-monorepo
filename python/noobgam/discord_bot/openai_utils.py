@@ -63,7 +63,8 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     stripped_model = model_id in ["o1-preview", "o1-mini"]
     openrouter_models = {
         'r1-deepseek': 'deepseek/deepseek-r1',
-        '3.5-sonnet': 'anthropic/claude-3.5-sonnet:beta'
+        '3.5-sonnet': 'anthropic/claude-3.5-sonnet:beta',
+        'o3-mini': 'openai/o3-mini'
     }
 
     if stripped_model or model_id == "r1-deepseek":

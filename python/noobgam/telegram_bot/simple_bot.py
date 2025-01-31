@@ -133,7 +133,8 @@ async def set_model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Create an inline keyboard with model options
     keyboard = [
         [InlineKeyboardButton(model, callback_data=f"set_model:{model}")]
-        for model in ["gpt-4o-2024-08-06", "gpt-4o-2024-11-20", "o1-preview", "o1-mini", "r1-deepseek", "3.5-sonnet"]
+        for model in ["gpt-4o-2024-08-06", "gpt-4o-2024-11-20", "o1-preview",
+                      "o1-mini", "r1-deepseek", "3.5-sonnet", "o3-mini"]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
