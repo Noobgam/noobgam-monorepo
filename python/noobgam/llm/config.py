@@ -17,7 +17,7 @@ def get_anki_chain(added_prompt: str = "") -> ConversationHistoryChain:
     }
     llm = ChatOpenAI(
         **common_params,
-        model="openai/o1-preview",
+        model="openai/o3-mini",
     )
     chat_history = InMemoryChatMessageHistory(messages=[
         SystemMessage(content=ANKI_SYSTEM_PROMPT + added_prompt),
