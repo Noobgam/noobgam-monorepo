@@ -16,6 +16,7 @@ services:
     entrypoint: python -m noobgam.local_server.tg_bot
     volumes:
       - tg_bot_data:/monorepo/data
+    restart: always
   allround_bot:
     image: 928383298076.dkr.ecr.eu-central-1.amazonaws.com/monorepo-python:latest
     build: .
@@ -32,6 +33,6 @@ services:
       - OPENROUTER_API_KEY
       - TELEGRAM_PERSONAL_PASSWORD
       - TELEGRAM_PERSONAL_TOKEN
-
+    restart: always
 volumes:
   tg_bot_data:
