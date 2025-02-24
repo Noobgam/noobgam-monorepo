@@ -64,7 +64,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     openrouter_models = {
         'r1-deepseek': 'deepseek/deepseek-r1',
         '3.5-sonnet': 'anthropic/claude-3.5-sonnet',
-        '3.7-sonnet': 'anthropic/claude-3-7-sonnet',
+        '3.7-sonnet': 'anthropic/claude-3.7-sonnet',
         'o3-mini': 'openai/o3-mini'
     }
 
