@@ -65,7 +65,8 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
         'r1-deepseek': 'deepseek/deepseek-r1',
         '3.5-sonnet': 'anthropic/claude-3.5-sonnet',
         '3.7-sonnet': 'anthropic/claude-3.7-sonnet',
-        'o3-mini': 'openai/o3-mini'
+        'o3-mini': 'openai/o3-mini',
+        'gpt-4.5': 'openai/gpt-4.5-preview',
     }
 
     if stripped_model or model_id == "r1-deepseek":
