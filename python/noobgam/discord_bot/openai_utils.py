@@ -60,30 +60,20 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     pre_prompt = PRE_CHAT_PROMPT
 
     mapped_messages: List[ChatCompletionUserMessageParam]
-    stripped_model = model_id in ["o1-preview", "o1-mini"]
     openrouter_models = {
-        'r1-deepseek': 'deepseek/deepseek-r1',
-        '3.5-sonnet': 'anthropic/claude-3.5-sonnet',
-        '3.7-sonnet': 'anthropic/claude-3.7-sonnet',
-        'o3-mini': 'openai/o3-mini',
-        'gpt-4.5': 'openai/gpt-4.5-preview',
-        'gemini-pro-2.5': 'google/gemini-2.5-pro-exp-03-25:free',
+        'gpt-4.1': 'openai/gpt-4.1',
+        'o4-mini-high': 'openai/o4-mini-high',
+        'opus-4.0': 'anthropic/claude-3.5-sonnet',
+        'sonnet-4.0': 'anthropic/claude-sonnet-4',
+        'gemini-pro-2.5': 'google/gemini-2.5-pro-preview',
     }
 
-    if stripped_model or model_id == "r1-deepseek":
-        mapped_messages = [
-            {"role": "user", "content": [{"type": "text", "text": pre_prompt}]},
-        ] + [
-            to_openai_message(message, include_images=False)
-            for message in messages
-        ]
-    else:
-        mapped_messages = [
-            {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
-        ] + [
-            to_openai_message(message, include_images=True)
-            for message in messages
-        ]
+    mapped_messages = [
+        {"role": "system", "content": [{"type": "text", "text": pre_prompt}]},
+    ] + [
+        to_openai_message(message, include_images=True)
+        for message in messages
+    ]
 
     openrouter_model = openrouter_models.get(model_id, None)
     cl = client
@@ -94,7 +84,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
     response = await cl.chat.completions.create(
         model=model_id,
         messages=mapped_messages,
-        max_completion_tokens=4000,
-        temperature=1 if stripped_model else 0.6,
+        max_completion_tokens=8192,
+        temperature=1,
     )
     return response.choices[0].message.content

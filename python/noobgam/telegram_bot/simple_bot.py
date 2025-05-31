@@ -4,7 +4,7 @@ import logging
 import os
 import pickle
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Literal, Optional
 import google.generativeai as genai
 
 from openai import AsyncOpenAI
@@ -34,6 +34,15 @@ allowlisted_uids = set()
 msg_hist: Dict[int, List[UserMessage]] = {}
 models_selected: Dict[int, str] = {}
 image_models_selected: Dict[int, str] = {}
+
+# Updated model list to match the reference
+AVAILABLE_MODELS = [
+    "gpt-4.1",
+    "sonnet-4.0",
+    "opus-4.0",
+    "o4-mini-high",
+    "gemini-2.5-pro",
+]
 
 def restore_state():
     global allowlisted_uids, msg_hist, models_selected, image_models_selected
@@ -130,11 +139,9 @@ async def set_model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("You are not authorized to use this command. Please enter the password first.")
         return
 
-    # Create an inline keyboard with model options
     keyboard = [
         [InlineKeyboardButton(model, callback_data=f"set_model:{model}")]
-        for model in ["gpt-4o-2024-08-06", "gpt-4o-2024-11-20", "o1-preview",
-                      "o1-mini", "r1-deepseek", "3.7-sonnet", "3.5-sonnet", "o3-mini", "gpt-4.5", "gemini-pro-2.5"]
+        for model in AVAILABLE_MODELS
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -229,7 +236,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text and update.message.text.startswith("/generate_image"):
         return await generate_image_impl(update, update.message.text[len("/generate_image") + 1:])
 
-    model_selected = models_selected.get(uid, "gpt-4o-2024-08-06")
+    model_selected = models_selected.get(uid, "gpt-4.1")  # Updated default model
     image_model_selected = image_models_selected.get(uid, "dallee")
 
     if update.message.text and update.message.text.startswith("/get_model"):
