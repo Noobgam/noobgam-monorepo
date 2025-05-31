@@ -65,7 +65,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
         'o4-mini-high': 'openai/o4-mini-high',
         'opus-4.0': 'anthropic/claude-opus-4',
         'sonnet-4.0': 'anthropic/claude-sonnet-4',
-        'gemini-pro-2.5': 'google/gemini-2.5-pro-preview',
+        'gemini-2.5-pro': 'google/gemini-2.5-pro-preview',
     }
 
     mapped_messages = [
