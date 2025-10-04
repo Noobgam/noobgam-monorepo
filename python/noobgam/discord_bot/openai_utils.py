@@ -64,8 +64,8 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
         'gpt-5': 'openai/gpt-5-chat',
         'gpt-4.1': 'openai/gpt-4.1',
         'o4-mini-high': 'openai/o4-mini-high',
-        'opus-4.0': 'anthropic/claude-opus-4',
-        'sonnet-4.0': 'anthropic/claude-sonnet-4',
+        'opus-4.1': 'anthropic/claude-opus-4.1',
+        'sonnet-4.5': 'anthropic/claude-sonnet-4.5',
         'gemini-2.5-pro': 'google/gemini-2.5-pro-preview',
     }
 
