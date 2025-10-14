@@ -39,8 +39,8 @@ image_models_selected: Dict[int, str] = {}
 AVAILABLE_MODELS = [
     "gpt-4.1",
     "gpt-5",
-    "sonnet-4.0",
-    "opus-4.0",
+    "sonnet-4.5",
+    "opus-4.1",
     "o4-mini-high",
     "gemini-2.5-pro",
 ]
