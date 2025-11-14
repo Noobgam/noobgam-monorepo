@@ -61,7 +61,7 @@ async def respond_to_message_history_openai(messages: List[UserMessage], model_i
 
     mapped_messages: List[ChatCompletionUserMessageParam]
     openrouter_models = {
-        'gpt-5': 'openai/gpt-5-chat',
+        'gpt-5.1': 'openai/gpt-5.1',
         'gpt-4.1': 'openai/gpt-4.1',
         'o4-mini-high': 'openai/o4-mini-high',
         'opus-4.1': 'anthropic/claude-opus-4.1',

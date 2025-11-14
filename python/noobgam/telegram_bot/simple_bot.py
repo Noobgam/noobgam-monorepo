@@ -38,7 +38,7 @@ image_models_selected: Dict[int, str] = {}
 # Updated model list to match the reference
 AVAILABLE_MODELS = [
     "gpt-4.1",
-    "gpt-5",
+    "gpt-5.1",
     "sonnet-4.5",
     "opus-4.1",
     "o4-mini-high",
