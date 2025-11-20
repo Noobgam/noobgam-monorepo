@@ -43,6 +43,7 @@ AVAILABLE_MODELS = [
     "opus-4.1",
     "o4-mini-high",
     "gemini-2.5-pro",
+    "gemini-3-pro"
 ]
 
 def restore_state():
